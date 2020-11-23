@@ -1,10 +1,9 @@
 #include "pch.h"
 #include "Tile.h"
 
-Tile::Tile(int terrain, string allegiance)
+Tile::Tile(int terrain)
 {
 	m_terrain = terrain;
-	m_allegiance = allegiance;
 	m_hasFactory = false;
 }
 

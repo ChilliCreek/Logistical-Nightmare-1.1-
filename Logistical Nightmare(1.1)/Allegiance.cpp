@@ -6,17 +6,22 @@ void Allegiance::addFactoryNumber()
 	m_factoryNumber++;
 }
 
-void Allegiance::addTile(int x, int y)
+void Allegiance::addTile(int x, int y, Tile* tilePointer)
 {
-	m_tiles.push_back(make_pair(x, y));
+	m_tiles[make_pair(x, y)] = tilePointer;
 }
 
-bool Allegiance::ifLost()
+bool Allegiance::ifLost()const
 {
 	if (m_tiles.size() == 0) {
 		return true;
 	}
 	return false;
+}
+
+void Allegiance::update(float)
+{
+
 }
 
 void Allegiance::setName(string& name)
