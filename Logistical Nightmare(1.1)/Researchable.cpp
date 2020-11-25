@@ -15,7 +15,11 @@ void Researchable::update()
 		m_researchStatus = e_researchStatus::RESEARCHED;
 	}
 }
-Researchable::Researchable(string name, Vector2f position, float resTime) : m_researchSprite(TextureHolder::getTexture(name)), RESEARCH_TIME(resTime) {
-	m_researchSprite.setPosition(position);
+Equipment& Researchable::getEquipment()
+{
+	return m_equipment;
+}
+Researchable::Researchable(string name, float armor, float antiArmor, float antiPersonnel, float productionCost, float reliability, Vector2f position, float resTime) : RESEARCH_TIME(resTime), m_equipment(name, armor, antiArmor, antiPersonnel, productionCost, reliability) {
 	m_researchStatus = e_researchStatus::NOT_RESEARCHED;
+	m_equipment.setSpritePosition(position);
 }

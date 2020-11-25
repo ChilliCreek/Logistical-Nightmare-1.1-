@@ -1,23 +1,36 @@
-#include "pch.h"
-#include "Tile.h"
-
+#include"pch.h"
+#include"Tile.h"
+#include<iostream>
 Tile::Tile(int terrain)
 {
 	m_terrain = terrain;
 	m_hasFactory = false;
+	m_equipmentInProduction = "graphics/kar98k.png";
+}
+
+bool Tile::hasFactory() const
+{
+	return m_hasFactory;
 }
 
 void Tile::addFactory()
 {
 	m_hasFactory = true;
+	m_productionCost = 5.f;
 }
 
-int Tile::update(float time)
+void Tile::setEquipmentInProduction(string equipmentName, float productionCost)
 {
-	if (m_hasFactory) {
-		return produce(time);
-	}
-	else {
-		return 0;
-	}
+	m_productionCost = productionCost;
+	m_equipmentInProduction = equipmentName;
+}
+
+pair <string, int> Tile::update(float time)
+{
+	m_produced += time * (m_factoryOutput / m_productionCost);
+	int latestBatch = int(m_produced) - m_producedBefore;
+	m_producedBefore = int(m_produced);
+	cout << m_equipmentInProduction;
+	pair<string, int> result = make_pair(m_equipmentInProduction, latestBatch);
+	return result;
 }

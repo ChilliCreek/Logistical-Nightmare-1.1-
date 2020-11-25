@@ -5,10 +5,10 @@
 class Unit 
 {
 private:
-	std::string m_allegiance;
 	float m_strength;
+	float m_armor;
+	float m_antiPersonnel;
+
 public:
-	std::string getAllegience();
-	bool isFriend(std::string&);
 	float getStrength();
 };
