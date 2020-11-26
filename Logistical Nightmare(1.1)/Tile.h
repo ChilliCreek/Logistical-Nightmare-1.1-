@@ -14,8 +14,8 @@ private:
 	float m_productionCost;
 	float m_produced = 0;
 	int m_producedBefore = 0;
-public:
 	string m_equipmentInProduction;
+public:
 	Tile(int terrain);
 	bool hasFactory()const;
 	void addFactory();

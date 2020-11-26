@@ -11,7 +11,7 @@ private:
 	Clock* m_researchClock;
 	Equipment m_equipment;
 public:
-	Researchable(string, float, float, float, float, float, Vector2f, float);
+	Researchable(string name, float armor, float antiArmor, float antiPersonnel, float productionCost, float reliability, Vector2f position, float resTime);
 	void doResearch(e_researchStatus);
 	void update();
 	Equipment& getEquipment();

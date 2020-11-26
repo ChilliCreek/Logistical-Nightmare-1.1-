@@ -11,8 +11,8 @@ vector<vector<Tile>> Engine::saveLoader(vector<Allegiance>& allegiances)
 	allegiances[0].setName(nameLeft);
 	allegiances[1].setName(nameRight);
 
-	allegiance1.setString(nameLeft);
-	allegiance2.setString(nameRight);
+	m_allegiance1.setString(nameLeft);
+	m_allegiance2.setString(nameRight);
 
 	vector <vector <Tile> > tiles;
 
@@ -39,10 +39,16 @@ vector<vector<Tile>> Engine::saveLoader(vector<Allegiance>& allegiances)
 
 void Engine::equipmentStatSetter()
 {
-	infantryRes.push_back(Researchable("graphics/kar98k.png", 0.f, 0.f, 10.f, 5.f, 90.f, Vector2f(0, 0), 10));
-	infantryRes.push_back(Researchable("graphics/anti_tank.png", 5.f, 90.f, 2.f, 40.f, 80.f, Vector2f(0, 100), 100));
-	tankRes.push_back(Researchable("graphics/panzer_3_b.png", 30.f, 45.f, 10.f, 190.f, 78.f, Vector2f(200, 0), 150));
-	tankRes.push_back(Researchable("graphics/tiger_2_p.png", 120.f, 200.f, 20.f, 550.f, 60.f, Vector2f(200, 100), 300));
+	infantryRes.push_back(Researchable("graphics/kar98k.png", 0.f, 0.f, 15.f, 5.f, 90.f, Vector2f(0, 0), 10));
+	infantryRes.push_back(Researchable("graphics/mp40.png", 0.f, 0.f, 30.f, 10.f, 79.f, Vector2f(0, 100), 100));
+	infantryRes.push_back(Researchable("graphics/panzerschreck.png", 0.f, 60.f, 5.f, 20.f, 85.f, Vector2f(0, 200), 200));
+	infantryRes.push_back(Researchable("graphics/panzerfaust.png", 0.f, 80.f, 2.f, 20.f, 80.f, Vector2f(0, 300), 400));
+	tankRes.push_back(Researchable("graphics/panzer_3_b.png", 30.f, 45.f, 25.f, 190.f, 92.f, Vector2f(200, 0), 150));
+	tankRes.push_back(Researchable("graphics/panzer_4_g.png", 60.f, 90.f, 27.f, 240.f, 89.f, Vector2f(200, 100), 150));
+	tankRes.push_back(Researchable("graphics/panther.png", 100.f, 145.f, 27.f, 320.f, 74.f, Vector2f(200, 200), 400));
+	tankRes.push_back(Researchable("graphics/tiger_2_p.png", 130.f, 180.f, 40.f, 550.f, 60.f, Vector2f(200, 300), 800));
+	tankRes.push_back(Researchable("graphics/tiger_2_h.png", 160.f, 180.f, 40.f, 600.f, 65.f, Vector2f(200, 400), 200));
+	antiTankRes.push_back(Researchable("graphics/anti_tank.png", 0.f, 80.f, 2.f, 20.f, 80.f, Vector2f(400, 0), 400));
 }
 
 void Engine::input(RenderWindow& window, View& hudView, View& uiView, View& mapView, Vector2f resolution, e_tab& tabStatus, Event& event)
@@ -86,27 +92,27 @@ void Engine::input(RenderWindow& window, View& hudView, View& uiView, View& mapV
 void Engine::zoom(View& mapView, float scrollDelta)
 {
 	if (scrollDelta > 0) {
-		if ((mapView.getSize().x + 10 * scrollDelta) > mapSize.x) {
-			mapView.setSize(mapSize);
+		if ((mapView.getSize().x + m_ZOOM_SENSITIVITY * scrollDelta) > m_mapSize.x * 2) {
+			mapView.setSize(Vector2f(m_mapSize.x * 2.f, m_mapSize.y * 2.f));
 		}
 		else {
-			mapView.setSize(Vector2f(mapView.getSize().x + 10 * scrollDelta, mapView.getSize().y + 10.f / mapSize.x * mapSize.y * scrollDelta));
+			mapView.setSize(Vector2f(mapView.getSize().x + m_ZOOM_SENSITIVITY * scrollDelta, mapView.getSize().y + m_ZOOM_SENSITIVITY / m_mapSize.x * m_mapSize.y * scrollDelta));
 		}
 	}
 	else {
-		if ((mapView.getSize().x - 10 * scrollDelta) < (mapSize.x / 3)) {
-			mapView.setSize(Vector2f(mapSize.x / 3, mapSize.y / 3));
+		if ((mapView.getSize().x + m_ZOOM_SENSITIVITY * scrollDelta) < (m_mapSize.x / 2)) {
+			mapView.setSize(Vector2f(m_mapSize.x / 2.f, m_mapSize.y / 2.f));
 		}
 		else {
-			mapView.setSize(Vector2f(mapView.getSize().x - 10 * scrollDelta, mapView.getSize().y - 10.f / mapSize.x * mapSize.y * scrollDelta));
+			mapView.setSize(Vector2f(mapView.getSize().x + m_ZOOM_SENSITIVITY * scrollDelta, mapView.getSize().y + m_ZOOM_SENSITIVITY / m_mapSize.x * m_mapSize.y * scrollDelta));
 		}
 	}
 }
 
 void Engine::hudInput(Vector2f mouseHudPos, e_tab& tab)
 {
-	if (mouseHudPos.y > (resolution.y * 0.075f)) {
-		switch (int (mouseHudPos.x / (resolution.x / 6))) {
+	if (mouseHudPos.y > (m_resolution.y * 0.075f)) {
+		switch (int (mouseHudPos.x / (m_resolution.x / 6))) {
 		    case 0:
 				tab = e_tab::NONE;
 				break;
@@ -114,55 +120,11 @@ void Engine::hudInput(Vector2f mouseHudPos, e_tab& tab)
 				tab = e_tab::RESEARCH;
 				break;
 			case 2:
-				tab = e_tab::FACTORY;
+				tab = e_tab::BUILD;
 				break;
 			default:
 				tab = e_tab::NONE;
 		}
-	}
-}
-
-void Engine::drawToWindow(RenderWindow& window, View& hudView, View& uiView, View& mapView, e_tab& tabs)
-{
-	drawHudToWindow(window, hudView);
-	//drawMapToWindow(window, mapView);
-	switch (tabs) {
-	    case e_tab::RESEARCH:
-		    drawResearchToWindow(window, uiView);
-			break;
-		case e_tab::TILE:
-			//drawTileToWindow(window, uiView);
-			break;
-		case e_tab::FACTORY:
-			//drawFactoryToWindow(window, uiView);
-			break;
-		case e_tab::STORAGE:
-			//drawFactoryToWindow(window, uiView);
-		default:
-			break;
-	}
-}
-
-void Engine::drawHudToWindow(RenderWindow& window, View& hudView)
-{
-	window.setView(hudView);
-	window.draw(hudBackground);
-	window.draw(allegiance1);
-	window.draw(allegiance2);
-	for (int i = 0; i < 2; i++) {
-		window.draw(tabs[i]);
-	}
-}
-
-void Engine::drawResearchToWindow(RenderWindow& window, View& uiView)
-{
-	window.setView(uiView);
-	window.draw(researchBackground);
-	for (auto& res : infantryRes) {
-		window.draw(res.getEquipment().getEquipmentSprite());
-	}
-	for (auto& res : tankRes) {
-		window.draw(res.getEquipment().getEquipmentSprite());
 	}
 }
 
@@ -174,29 +136,27 @@ void Engine::run()
 	allegiances.push_back(Allegiance());
 
 	vector <vector <Tile> > tiles = saveLoader(allegiances);
-	tilesNums = Vector2f(tiles.size(), tiles[0].size());
-	mapSize = Vector2f(tilesNums.x * 100, tilesNums.y * 100);
+	m_tilesNums = Vector2f(tiles.size(), tiles[0].size());
+	m_mapSize = Vector2f(m_tilesNums.x * m_TILE_SIZE, m_tilesNums.y * m_TILE_SIZE);
 
 	e_gameStat gameStatus = e_gameStat::RUNNING;
 	//Creating the window
-	VideoMode vm(resolution.x, resolution.y);
+	VideoMode vm(m_resolution.x, m_resolution.y);
 	RenderWindow window(vm, "Logistical Nightmare", Style::Fullscreen);
+	window.setFramerateLimit(30);
 	//Views
-	View hudView(FloatRect(0, 0, resolution.x, resolution.y * 0.15f));
+	View hudView(FloatRect(0, 0, m_resolution.x, m_resolution.y * 0.15f));
 	hudView.setViewport(FloatRect(0, 0, 1, 0.15f));
-	View uiView(FloatRect(0, 0, resolution.x, resolution.y * 0.85f));
+	View uiView(FloatRect(0, 0, m_resolution.x, m_resolution.y * 0.85f));
 	uiView.setViewport(FloatRect(0, 0.15f, 1, 1));
-	View mapView(FloatRect(0, 0, mapSize.x, mapSize.y));
+	View mapView(Vector2f(m_mapSize.x / 2.f, m_mapSize.y / 2.f), Vector2f(m_mapSize.x, m_mapSize.y));
 	mapView.setViewport(FloatRect(0, 0.15f, 1, 1));
-	mapView.setCenter(Vector2f(mapSize.x / 2, mapSize.y / 2));
 	//Tab status
 	e_tab tabStatus = e_tab::NONE;
 	//Event for input
 	Event event;
 	//Runtime clock
-	Clock runTime; float elapsedTime;
-	//Launching TextureHolder
-	TextureHolder textureHolder;
+	Clock clock; float deltaTime;
 	//Setting stats for equipments
 	equipmentStatSetter();
 
@@ -205,50 +165,15 @@ void Engine::run()
 			window.close();
 		}
 		else {
-			elapsedTime = runTime.restart().asSeconds();
+			deltaTime = clock.restart().asSeconds();
+			runTime += deltaTime;
 			for (int i = 0; i < 2; i++) {
-				allegiances[i].update(elapsedTime, tiles);
+				allegiances[i].update(deltaTime, tiles);
 			}
-			input(window, hudView, uiView, mapView, resolution, tabStatus, event);
+			input(window, hudView, uiView, mapView, m_resolution, tabStatus, event);
 			drawToWindow(window, hudView, uiView, mapView, tabStatus);
 			window.display();
 			window.clear();
 		}
 	}
-}
-Engine::Engine() 
-{
-	//resolution 
-	resolution.x = VideoMode::getDesktopMode().width;
-	resolution.y = VideoMode::getDesktopMode().height;
-	//hud background
-	Color brown(150, 75, 0, 255);
-	hudBackground.setFillColor(brown);
-	hudBackground.setPosition(0, 0);
-	hudBackground.setSize(Vector2f(resolution.x, resolution.y * 0.15f));
-	//research background
-	researchBackground.setFillColor(brown);
-	researchBackground.setPosition(0, 0);
-	researchBackground.setSize(Vector2f(400, 600));
-	//map background
-	mapBackground.setFillColor(Color::Green);
-	mapBackground.setPosition(0, 0);
-	mapBackground.setSize(mapSize);
-	//font set
-	font.loadFromFile("font/Stanberry.ttf");
-	//Allegiance names
-	allegiance1.setFont(font);
-	allegiance2.setFont(font);
-	allegiance1.setCharacterSize(10);
-	allegiance2.setCharacterSize(10);
-	allegiance1.setPosition(0, 0);
-	allegiance2.setPosition(resolution.x * 0.80f, 0);
-	//Tabs
-	for (int i = 0; i < 6; i++) {
-		tabs[i].setCharacterSize(20);
-		tabs[i].setPosition((resolution.x / 6) * i, resolution.y * 0.1);
-		tabs[i].setFont(font);
-	}
-	tabs[0].setString("Map");
-	tabs[1].setString("Research");
 }
