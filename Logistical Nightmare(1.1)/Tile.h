@@ -3,8 +3,6 @@
 #include<string>
 #include<utility>
 
-using namespace std;
-
 class Tile
 {
 private:
@@ -14,11 +12,11 @@ private:
 	float m_productionCost;
 	float m_produced = 0;
 	int m_producedBefore = 0;
-	string m_equipmentInProduction;
+	std::string m_equipmentInProduction;
 public:
 	Tile(int terrain);
 	bool hasFactory()const;
 	void addFactory();
-	void setEquipmentInProduction(string equipmentName, float productionCost);
-	pair <string, int> update(float);
+	void setEquipmentInProduction(std::string equipmentName, float productionCost);
+	std::pair <std::string, int> update(float);
 };

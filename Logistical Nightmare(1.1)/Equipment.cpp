@@ -3,7 +3,7 @@
 
 const float Equipment::m_TEXTURE_SCALE = 0.25f;
 
-string Equipment::getName() const
+std::string Equipment::getName() const
 {
 	return m_name;
 }
@@ -23,12 +23,12 @@ float Equipment::getProductionCost() const
 	return m_productionCost;
 }
 
-Sprite& Equipment::getEquipmentSprite()
+sf::Sprite& Equipment::getEquipmentSprite()
 {
 	return m_equipmentSprite;
 }
 
-Equipment::Equipment(string name, float armor, float antiArmor, float antiPersonnel, float productionCost, float reliability)
+Equipment::Equipment(std::string name, float armor, float antiArmor, float antiPersonnel, float productionCost, float reliability)
 {
 	m_name = name;
 	m_armor = armor;
@@ -40,7 +40,7 @@ Equipment::Equipment(string name, float armor, float antiArmor, float antiPerson
 	m_equipmentSprite.setScale(m_TEXTURE_SCALE, m_TEXTURE_SCALE);
 }
 
-void Equipment::setSpritePosition(Vector2f position)
+void Equipment::setSpritePosition(sf::Vector2f position)
 {
 	m_equipmentSprite.setPosition(position);
 }

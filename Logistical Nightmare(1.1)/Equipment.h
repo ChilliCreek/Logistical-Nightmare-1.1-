@@ -9,15 +9,15 @@ private:
 	float m_productionCost;
 	float m_antiPersonnel;
 	float m_antiArmor;
-	Sprite m_equipmentSprite;
-	string m_name;
+	sf::Sprite m_equipmentSprite;
+	std::string m_name;
 public:
 	static const float m_TEXTURE_SCALE;
-	string getName()const;
+	std::string getName()const;
 	float getArmor()const;
 	float getReliability()const;
 	float getProductionCost()const;
-	Sprite& getEquipmentSprite();
-	Equipment(string name, float armor, float antiArmor, float antiPersonnel, float productionCost, float reliability);
-	void setSpritePosition(Vector2f position);
+	sf::Sprite& getEquipmentSprite();
+	Equipment(std::string name, float armor, float antiArmor, float antiPersonnel, float productionCost, float reliability);
+	void setSpritePosition(sf::Vector2f position);
 };

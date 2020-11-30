@@ -4,24 +4,24 @@
 //constants initialization
 const float Renderer::m_TIME_DILATION = 10000.f;
 const float Renderer::m_ZOOM_SENSITIVITY = 0.1f;
-const string Renderer::m_monthStrings[12] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
+const std::string Renderer::m_monthStrings[12] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
 
 Renderer::Renderer()
 {
 	//resolution 
-	m_resolution.x = VideoMode::getDesktopMode().width;
-	m_resolution.y = VideoMode::getDesktopMode().height;
+	m_resolution.x = sf::VideoMode::getDesktopMode().width;
+	m_resolution.y = sf::VideoMode::getDesktopMode().height;
 	//hud background
-	Color brown(150, 75, 0, 255);
+	sf::Color brown(150, 75, 0, 255);
 	m_hudBackground.setFillColor(brown);
 	m_hudBackground.setPosition(0, 0);
-	m_hudBackground.setSize(Vector2f(m_resolution.x, m_resolution.y * 0.15f));
+	m_hudBackground.setSize(sf::Vector2f(m_resolution.x, m_resolution.y * 0.15f));
 	//research background
 	m_researchBackground.setFillColor(brown);
 	m_researchBackground.setPosition(0, 0);
-	m_researchBackground.setSize(Vector2f(600, 600));
+	m_researchBackground.setSize(sf::Vector2f(600, 600));
 	//map background
-	m_mapBackground.setFillColor(Color::Green);
+	m_mapBackground.setFillColor(sf::Color::Green);
 	m_mapBackground.setPosition(0, 0);
 	m_mapBackground.setSize(m_mapSize);
 	//font set
@@ -41,7 +41,7 @@ Renderer::Renderer()
 	m_tabs[4].setString("Storage");
 	m_tabs[5].setString("Units");
 	for (int i = 0; i < 6; i++) {
-		m_tabs[i].setFillColor(Color::Black);
+		m_tabs[i].setFillColor(sf::Color::Black);
 		m_tabs[i].setCharacterSize(25);
 		m_tabs[i].setPosition((m_resolution.x / 6) * i + m_resolution.x / 12, m_resolution.y * 0.125);
 		m_tabs[i].setFont(m_font);
@@ -63,7 +63,7 @@ Renderer::Renderer()
 	m_tileSprite.setScale(0.5f, 0.5f);
 }
 
-void Renderer::drawToWindow(RenderWindow& window, View& hudView, View& uiView, View& mapView, e_tab& tabs)
+void Renderer::drawToWindow(sf::RenderWindow& window, sf::View& hudView, sf::View& uiView, sf::View& mapView, e_tab& tabs)
 {
 	switch (tabs) {
 	case e_tab::UNITS:
@@ -86,7 +86,7 @@ void Renderer::drawToWindow(RenderWindow& window, View& hudView, View& uiView, V
 	drawHudToWindow(window, hudView);
 }
 
-void Renderer::drawHudToWindow(RenderWindow& window, View& hudView)
+void Renderer::drawHudToWindow(sf::RenderWindow& window, sf::View& hudView)
 {
 	window.setView(hudView);
 	window.draw(m_hudBackground);
@@ -102,7 +102,7 @@ void Renderer::drawHudToWindow(RenderWindow& window, View& hudView)
 	window.draw(m_time);
 }
 
-void Renderer::drawResearchToWindow(RenderWindow& window, View& uiView)
+void Renderer::drawResearchToWindow(sf::RenderWindow& window, sf::View& uiView)
 {
 	window.setView(uiView);
 	window.draw(m_researchBackground);
@@ -120,7 +120,7 @@ void Renderer::drawResearchToWindow(RenderWindow& window, View& uiView)
 	}
 }
 
-void Renderer::drawMapToWindow(RenderWindow& window, View& mapView)
+void Renderer::drawMapToWindow(sf::RenderWindow& window, sf::View& mapView)
 {
 	window.setView(mapView);
 	for (int i = 0; i < int(m_tilesNums.x); i++) {
@@ -131,17 +131,20 @@ void Renderer::drawMapToWindow(RenderWindow& window, View& mapView)
 	}
 }
 
-string Renderer::secondsToDateAndTime(float sec)
+std::string Renderer::secondsToDateAndTime(float sec)
 {
+	e_tab res = e_tab(1);
 	sec = sec * m_TIME_DILATION;
 	float days = (sec / 86400.f);
 	int year = 1;
-	stringstream ss;
+	std::stringstream ss;
+
 	while ((year % 4 != 0 && days >= 365) || (year % 4 == 0 && days >= 366)) {
 		days -= 365;
 		days = (year % 4 == 0) ? (days - 1) : days;
 		year++;
 	}
+
 	int month = 1;
 	bool addedOne = true;
 	while (addedOne) {

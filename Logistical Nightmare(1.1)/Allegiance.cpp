@@ -19,18 +19,18 @@ bool Allegiance::ifLost()const
 	return false;
 }
 
-void Allegiance::update(float elapsedTime, vector <vector <Tile> >& tiles)
+void Allegiance::update(float elapsedTime, std::vector <std::vector <Tile> >& tiles)
 {
 	for (auto& location : m_tilesLoc) {
 		if (tiles[location.x][location.y].hasFactory()) {
-			pair <string, int> res = tiles[location.x][location.y].update(elapsedTime);
+			std::pair <std::string, int> res = tiles[location.x][location.y].update(elapsedTime);
 			m_equipmentStorage[res.first] += res.second;
 		}
 	}
 	m_constructionPoints += elapsedTime;
 }
 
-void Allegiance::setName(string& name)
+void Allegiance::setName(std::string& name)
 {
 	m_name = name;
 }
@@ -40,7 +40,7 @@ float Allegiance::getConstructionPoints() const
 	return m_constructionPoints;
 }
 
-string Allegiance::getName()const
+std::string Allegiance::getName()const
 {
 	return m_name;
 }

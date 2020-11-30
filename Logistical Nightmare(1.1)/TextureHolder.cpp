@@ -9,7 +9,7 @@ TextureHolder::TextureHolder()
 	m_s_Instance = this;
 }
 
-Texture& TextureHolder::getTexture(string const& filename)
+sf::Texture& TextureHolder::getTexture(std::string const& filename)
 {
 	// auto = map<string, Texture>
 	auto& texturesRef = m_s_Instance->m_Textures;

@@ -19,18 +19,17 @@ void Tile::addFactory()
 	m_productionCost = 5.f;
 }
 
-void Tile::setEquipmentInProduction(string equipmentName, float productionCost)
+void Tile::setEquipmentInProduction(std::string equipmentName, float productionCost)
 {
 	m_productionCost = productionCost;
 	m_equipmentInProduction = equipmentName;
 }
 
-pair <string, int> Tile::update(float time)
+std::pair <std::string, int> Tile::update(float time)
 {
 	m_produced += time * (m_factoryOutput / m_productionCost);
 	int latestBatch = int(m_produced) - m_producedBefore;
 	m_producedBefore = int(m_produced);
-	cout << m_equipmentInProduction;
-	pair<string, int> result = make_pair(m_equipmentInProduction, latestBatch);
+	std::pair<std::string, int> result = make_pair(m_equipmentInProduction, latestBatch);
 	return result;
 }
