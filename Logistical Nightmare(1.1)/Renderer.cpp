@@ -2,8 +2,8 @@
 #include "Renderer.h"
 
 //constants initialization
-const float Renderer::m_TIME_DILATION = 25000.f;
-const float Renderer::m_ZOOM_SENSITIVITY = 40.f;
+const float Renderer::m_TIME_DILATION = 10000.f;
+const float Renderer::m_ZOOM_SENSITIVITY = 0.1f;
 const string Renderer::m_monthStrings[12] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
 
 Renderer::Renderer()
@@ -31,8 +31,8 @@ Renderer::Renderer()
 	m_allegiance2.setFont(m_font);
 	m_allegiance1.setCharacterSize(35);
 	m_allegiance2.setCharacterSize(35);
-	m_allegiance1.setPosition(0, 0);
-	m_allegiance2.setPosition(m_resolution.x * 0.80f, 0);
+	m_allegiance1.setPosition(20, 20);
+	m_allegiance2.setPosition(m_resolution.x * 0.85f, 20);
 	//Tabs
 	m_tabs[0].setString("Map");
 	m_tabs[1].setString("Research");
@@ -53,14 +53,37 @@ Renderer::Renderer()
 		m_tabButtons[i].setOrigin(m_tabButtons[i].getLocalBounds().width / 2, m_tabButtons[i].getLocalBounds().height / 2);
 	}
 	//runTime
-	m_time.setCharacterSize(20);
+	m_time.setCharacterSize(30);
 	m_time.setFont(m_font);
-	m_time.setPosition(m_resolution.x * 0.4f, 0);
+	m_time.setPosition(m_resolution.x * 0.45f, 0);
 	// Map section:
 
 	//Tile sprite
 	m_tileSprite.setTexture(TextureHolder::getTexture("graphics/plain.png"));
 	m_tileSprite.setScale(0.5f, 0.5f);
+}
+
+void Renderer::drawToWindow(RenderWindow& window, View& hudView, View& uiView, View& mapView, e_tab& tabs)
+{
+	switch (tabs) {
+	case e_tab::UNITS:
+		drawMapToWindow(window, mapView);
+		break;
+	case e_tab::RESEARCH:
+		drawResearchToWindow(window, uiView);
+		break;
+	case e_tab::PRODUCTION:
+		//drawTileToWindow(window, uiView);
+		break;
+	case e_tab::LOGISTICS:
+		//drawFactoryToWindow(window, uiView);
+		break;
+	case e_tab::BUILDING:
+		break;
+	case e_tab::OPTIONS:
+		break;
+	}
+	drawHudToWindow(window, hudView);
 }
 
 void Renderer::drawHudToWindow(RenderWindow& window, View& hudView)
@@ -84,12 +107,15 @@ void Renderer::drawResearchToWindow(RenderWindow& window, View& uiView)
 	window.setView(uiView);
 	window.draw(m_researchBackground);
 	for (auto& res : infantryRes) {
+		window.draw(res.getEquipmentBackground());
 		window.draw(res.getEquipment().getEquipmentSprite());
 	}
 	for (auto& res : tankRes) {
+		window.draw(res.getEquipmentBackground());
 		window.draw(res.getEquipment().getEquipmentSprite());
 	}
 	for (auto& res : antiTankRes) {
+		window.draw(res.getEquipmentBackground());
 		window.draw(res.getEquipment().getEquipmentSprite());
 	}
 }
@@ -105,26 +131,6 @@ void Renderer::drawMapToWindow(RenderWindow& window, View& mapView)
 	}
 }
 
-void Renderer::drawToWindow(RenderWindow& window, View& hudView, View& uiView, View& mapView, e_tab& tabs)
-{
-	drawHudToWindow(window, hudView);
-	drawMapToWindow(window, mapView);
-	switch (tabs) {
-	case e_tab::RESEARCH:
-		drawResearchToWindow(window, uiView);
-		break;
-	case e_tab::TILE:
-		//drawTileToWindow(window, uiView);
-		break;
-	case e_tab::BUILD:
-		//drawFactoryToWindow(window, uiView);
-		break;
-	case e_tab::STORAGE:
-		//drawFactoryToWindow(window, uiView);
-	default:
-		break;
-	}
-}
 string Renderer::secondsToDateAndTime(float sec)
 {
 	sec = sec * m_TIME_DILATION;

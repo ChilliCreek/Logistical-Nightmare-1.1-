@@ -11,7 +11,7 @@
 #include<fstream>
 #include"Researchable.h"
 
-enum class e_tab { NONE, RESEARCH, TILE, BUILD, STORAGE, UNITS};
+enum class e_tab { UNITS, RESEARCH, PRODUCTION, LOGISTICS, BUILDING, OPTIONS};
 
 class Renderer
 {

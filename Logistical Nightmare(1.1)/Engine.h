@@ -22,8 +22,8 @@ class Engine : public Renderer
 private:
 	vector <vector <Tile> > saveLoader(vector<Allegiance>& allegiances);
 	void equipmentStatSetter();
-	void input(RenderWindow&, View&, View&, View&, Vector2f, e_tab&, Event&);
-	//void researchInput();
+	void input(RenderWindow& window, View& hudView, View& uiView, View& mapView, Vector2f resolution, e_tab& tabStatus, Event& event);
+	void researchInput(Vector2f mouseGlobalPosition);
 	//void tileInput();
 	//void noneInput(Vector2f mousePos, e_tab&, bool);
 	void zoom(View&, float);
@@ -31,5 +31,4 @@ private:
 
 public:
 	void run();
-	//Engine();
 };

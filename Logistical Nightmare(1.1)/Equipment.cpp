@@ -1,6 +1,8 @@
 #include "pch.h"
 #include "Equipment.h"
 
+const float Equipment::m_TEXTURE_SCALE = 0.25f;
+
 string Equipment::getName() const
 {
 	return m_name;
@@ -35,7 +37,7 @@ Equipment::Equipment(string name, float armor, float antiArmor, float antiPerson
 	m_productionCost = productionCost;
 	m_reliability = reliability;
 	m_equipmentSprite.setTexture(TextureHolder::getTexture(m_name));
-	m_equipmentSprite.setScale(0.25, 0.25);
+	m_equipmentSprite.setScale(m_TEXTURE_SCALE, m_TEXTURE_SCALE);
 }
 
 void Equipment::setSpritePosition(Vector2f position)

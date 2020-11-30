@@ -10,9 +10,11 @@ private:
 	const float RESEARCH_TIME;
 	Clock* m_researchClock;
 	Equipment m_equipment;
+	RectangleShape m_equipmentBackground;
 public:
-	Researchable(string name, float armor, float antiArmor, float antiPersonnel, float productionCost, float reliability, Vector2f position, float resTime);
-	void doResearch(e_researchStatus);
-	void update();
 	Equipment& getEquipment();
+	Researchable(string name, float armor, float antiArmor, float antiPersonnel, float productionCost, float reliability, Vector2f position, float resTime);
+	void doResearch();
+	void update();
+	RectangleShape& getEquipmentBackground();
 };

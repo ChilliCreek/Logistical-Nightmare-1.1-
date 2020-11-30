@@ -12,11 +12,12 @@ private:
 	Sprite m_equipmentSprite;
 	string m_name;
 public:
+	static const float m_TEXTURE_SCALE;
 	string getName()const;
 	float getArmor()const;
 	float getReliability()const;
 	float getProductionCost()const;
 	Sprite& getEquipmentSprite();
-	Equipment(string, float, float, float, float, float);
-	void setSpritePosition(Vector2f);
+	Equipment(string name, float armor, float antiArmor, float antiPersonnel, float productionCost, float reliability);
+	void setSpritePosition(Vector2f position);
 };
