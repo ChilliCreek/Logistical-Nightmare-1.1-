@@ -28,10 +28,15 @@ std::vector<std::vector<Tile>> Engine::saveLoader(std::vector<Allegiance>& alleg
 	for (int i = 0; i < tileX; i++) {
 		for (int j = 0; j < tileY; j++) {
 			saveFile >> terrainNum >> allegianceNum;
-			Tile tempTile(terrainNum);
+			Tile tempTile(terrainNum, sf::Vector2i(i, j));
 			tiles[i].push_back(tempTile);
 			allegiances[allegianceNum].addTile(sf::Vector2i(i, j));
 		}
+	}
+	int factoryCooX, factoryCooY;
+	while (saveFile.peek() != EOF) {
+		saveFile >> factoryCooX >> factoryCooY;
+		tiles[factoryCooX][factoryCooY].addFactory();
 	}
 	saveFile.close();
 	return tiles;
@@ -39,7 +44,7 @@ std::vector<std::vector<Tile>> Engine::saveLoader(std::vector<Allegiance>& alleg
 
 void Engine::equipmentStatSetter()
 {
-	infantryRes.push_back(Researchable("graphics/kar98k.png", 0.f, 0.f, 15.f, 5.f, 90.f, sf::Vector2f(0, 0), 1));
+	infantryRes.push_back(Researchable("graphics/kar98k.png", 0.f, 0.f, 15.f, 5.f, 90.f, sf::Vector2f(0, 0), 10));
 	infantryRes.push_back(Researchable("graphics/mp40.png", 0.f, 0.f, 30.f, 10.f, 79.f, sf::Vector2f(0, 100), 100));
 	infantryRes.push_back(Researchable("graphics/panzerschreck.png", 0.f, 60.f, 5.f, 20.f, 85.f, sf::Vector2f(0, 200), 200));
 	infantryRes.push_back(Researchable("graphics/panzerfaust.png", 0.f, 80.f, 2.f, 20.f, 80.f, sf::Vector2f(0, 300), 400));
@@ -159,7 +164,7 @@ void Engine::run()
 
 	//Creating the window
 	sf::VideoMode vm(m_resolution.x, m_resolution.y);
-	sf::RenderWindow window(vm, "Logistical Nightmare", sf::Style::Titlebar);
+	sf::RenderWindow window(vm, "Logistical Nightmare", sf::Style::Fullscreen);
 	window.setFramerateLimit(30);
 
 	//Views
@@ -191,11 +196,12 @@ void Engine::run()
 		else {
 			deltaTime = clock.restart().asSeconds();
 			runTime += deltaTime;
-			//updating the tiles
+			//updating the tiles and thr two sides (allegiances)
 			for (int i = 0; i < 2; i++) {
 				allegiances[i].update(deltaTime, tiles);
 			}
-
+			m_allegianceCP1.setString("CP: " + std::to_string(int(allegiances[0].getConstructionPoints())));
+			m_allegianceCP2.setString("CP: " + std::to_string(int(allegiances[1].getConstructionPoints())));
 			//updating the research
 			for (auto& res : infantryRes) {
 				res.update();
@@ -208,7 +214,7 @@ void Engine::run()
 			}
 
 			input(window, hudView, uiView, mapView, m_resolution, tabStatus, event);
-			drawToWindow(window, hudView, uiView, mapView, tabStatus);
+			drawToWindow(window, hudView, uiView, mapView, tabStatus, tiles);
 			window.display();
 			window.clear();
 		}

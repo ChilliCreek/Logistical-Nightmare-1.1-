@@ -30,24 +30,25 @@ protected:
 	sf::Text m_allegiance2;
 	sf::Text m_tabs[6];
 	sf::Text m_time;
+	sf::Text m_allegianceCP1;
+	sf::Text m_allegianceCP2;
 	TextureHolder textureHolder;
 	sf::Sprite m_tabButtons[6];
-	sf::Sprite m_tileSprite;
 	sf::Font m_font;
 	float runTime = 0;
-	static const int m_TILE_SIZE = 200;
 	static const float m_ZOOM_SENSITIVITY;
 	static const float m_TIME_DILATION;
 	static const std::string m_monthStrings[12];
 public:
+	static const int m_TILE_SIZE = 200;
 	Renderer();
 	//The draw methods for the engine
-	void drawToWindow(sf::RenderWindow& window, sf::View& hudView, sf::View& uiView, sf::View& mapView, e_tab& tabs);
+	void drawToWindow(sf::RenderWindow& window, sf::View& hudView, sf::View& uiView, sf::View& mapView, e_tab& tabs, std::vector <std::vector <Tile> >& tiles);
 	void drawHudToWindow(sf::RenderWindow& window, sf::View& hudView);
 	void drawResearchToWindow(sf::RenderWindow& window, sf::View& uiView);
 	//void drawFactoryToWindow(RenderWindow&, View&);
 	//void drawTileToWindow(RenderWindow&, View&);
-	void drawMapToWindow(sf::RenderWindow& window, sf::View& mapView);
+	void drawMapToWindow(sf::RenderWindow& window, sf::View& mapView, std::vector <std::vector <Tile> >& tiles);
 	//void drawStorageToWindow(RenderWindow&, View&);
 	static std::string secondsToDateAndTime(float sec);
 };

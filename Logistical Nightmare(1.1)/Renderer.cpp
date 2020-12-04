@@ -29,8 +29,8 @@ Renderer::Renderer()
 	//Allegiance names
 	m_allegiance1.setFont(m_font);
 	m_allegiance2.setFont(m_font);
-	m_allegiance1.setCharacterSize(35);
-	m_allegiance2.setCharacterSize(35);
+	m_allegiance1.setCharacterSize(30);
+	m_allegiance2.setCharacterSize(30);
 	m_allegiance1.setPosition(20, 20);
 	m_allegiance2.setPosition(m_resolution.x * 0.85f, 20);
 	//Tabs
@@ -40,6 +40,13 @@ Renderer::Renderer()
 	m_tabs[3].setString("Build");
 	m_tabs[4].setString("Storage");
 	m_tabs[5].setString("Units");
+	//Construction points display
+	m_allegianceCP1.setFont(m_font);
+	m_allegianceCP2.setFont(m_font);
+	m_allegianceCP1.setCharacterSize(15);
+	m_allegianceCP2.setCharacterSize(15);
+	m_allegianceCP1.setPosition(200, 20);
+	m_allegianceCP2.setPosition(m_resolution.x * 0.8f, 20);
 	for (int i = 0; i < 6; i++) {
 		m_tabs[i].setFillColor(sf::Color::Black);
 		m_tabs[i].setCharacterSize(25);
@@ -56,18 +63,13 @@ Renderer::Renderer()
 	m_time.setCharacterSize(30);
 	m_time.setFont(m_font);
 	m_time.setPosition(m_resolution.x * 0.45f, 0);
-	// Map section:
-
-	//Tile sprite
-	m_tileSprite.setTexture(TextureHolder::getTexture("graphics/plain.png"));
-	m_tileSprite.setScale(0.5f, 0.5f);
 }
 
-void Renderer::drawToWindow(sf::RenderWindow& window, sf::View& hudView, sf::View& uiView, sf::View& mapView, e_tab& tabs)
+void Renderer::drawToWindow(sf::RenderWindow& window, sf::View& hudView, sf::View& uiView, sf::View& mapView, e_tab& tabs, std::vector <std::vector <Tile> >& tiles)
 {
 	switch (tabs) {
 	case e_tab::UNITS:
-		drawMapToWindow(window, mapView);
+		drawMapToWindow(window, mapView, tiles);
 		break;
 	case e_tab::RESEARCH:
 		drawResearchToWindow(window, uiView);
@@ -92,6 +94,8 @@ void Renderer::drawHudToWindow(sf::RenderWindow& window, sf::View& hudView)
 	window.draw(m_hudBackground);
 	window.draw(m_allegiance1);
 	window.draw(m_allegiance2);
+	window.draw(m_allegianceCP1);
+	window.draw(m_allegianceCP2);
 	for (int i = 0; i < 6; i++) {
 		window.draw(m_tabButtons[i]);
 	}
@@ -100,6 +104,18 @@ void Renderer::drawHudToWindow(sf::RenderWindow& window, sf::View& hudView)
 	}
 	m_time.setString(Renderer::secondsToDateAndTime(runTime));
 	window.draw(m_time);
+}
+
+void Renderer::drawMapToWindow(sf::RenderWindow& window, sf::View& mapView, std::vector <std::vector <Tile> >& tiles)
+{
+	window.setView(mapView);
+	for (int i = 0; i < int(m_tilesNums.x); i++) {
+		for (int j = 0; j < int(m_tilesNums.y); j++) {
+			window.draw(tiles[i][j].getTileSprite());
+			if (tiles[i][j].hasFactory())window.draw(tiles[i][j].getFactorySprite());;
+			window.draw(tiles[i][j].getTerrainSprite());
+		}
+	}
 }
 
 void Renderer::drawResearchToWindow(sf::RenderWindow& window, sf::View& uiView)
@@ -117,17 +133,6 @@ void Renderer::drawResearchToWindow(sf::RenderWindow& window, sf::View& uiView)
 	for (auto& res : antiTankRes) {
 		window.draw(res.getEquipmentBackground());
 		window.draw(res.getEquipment().getEquipmentSprite());
-	}
-}
-
-void Renderer::drawMapToWindow(sf::RenderWindow& window, sf::View& mapView)
-{
-	window.setView(mapView);
-	for (int i = 0; i < int(m_tilesNums.x); i++) {
-		for (int j = 0; j < int(m_tilesNums.y); j++) {
-			m_tileSprite.setPosition(m_TILE_SIZE * i, m_TILE_SIZE * j);
-			window.draw(m_tileSprite);
-		}
 	}
 }
 

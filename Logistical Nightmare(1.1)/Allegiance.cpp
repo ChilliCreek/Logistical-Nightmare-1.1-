@@ -24,7 +24,12 @@ void Allegiance::update(float elapsedTime, std::vector <std::vector <Tile> >& ti
 	for (auto& location : m_tilesLoc) {
 		if (tiles[location.x][location.y].hasFactory()) {
 			std::pair <std::string, int> res = tiles[location.x][location.y].update(elapsedTime);
-			m_equipmentStorage[res.first] += res.second;
+			if (res.first == "ConstructionPoints") {
+				m_constructionPoints += res.second;
+			}
+			else {
+				m_equipmentStorage[res.first] += res.second;
+			}
 		}
 	}
 	m_constructionPoints += elapsedTime;
