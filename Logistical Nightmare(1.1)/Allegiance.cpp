@@ -52,4 +52,6 @@ std::string Allegiance::getName()const
 
 Allegiance::Allegiance()
 {
+	m_factoryNumber = 0;
+	m_constructionPoints = 0;
 }

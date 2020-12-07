@@ -7,14 +7,23 @@ class Researchable
 {
 private:
 	e_researchStatus m_researchStatus;
-	const float RESEARCH_TIME;
+	sf::Text m_resTimeDays;
+	const float m_RESEARCH_TIME_SEC;
 	sf::Clock* m_researchClock;
 	Equipment m_equipment;
 	sf::RectangleShape m_equipmentBackground;
+	sf::RectangleShape m_progressBarFull;
+	sf::RectangleShape m_progressBarLeft;
 public:
+	static int researchesInProgress;
+	int prevResearchVectorLocation = -1;
 	Equipment& getEquipment();
-	Researchable(std::string name, float armor, float antiArmor, float antiPersonnel, float productionCost, float reliability, sf::Vector2f position, float resTime);
+	Researchable(std::string name, float armor, float antiArmor, float antiPersonnel, float productionCost, float reliability, sf::Vector2f position, float resTime, int prevRes);
 	void doResearch();
 	void update();
-	sf::RectangleShape& getEquipmentBackground();
+	e_researchStatus& isResearched();
+	sf::RectangleShape getEquipmentBackground();
+	sf::RectangleShape getProgressBarFull();
+	sf::RectangleShape getProgressBarLeft();
+	sf::Text& getResTimeText();
 };

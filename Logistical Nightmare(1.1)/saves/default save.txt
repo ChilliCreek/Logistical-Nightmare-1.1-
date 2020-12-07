@@ -1,4 +1,4 @@
-Germany Soviet_Union 
+Player1 Player2 
 12 8
 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0
 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0

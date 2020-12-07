@@ -1,6 +1,10 @@
 #include "pch.h"
 #include "Engine.h"
 
+float Engine::MAX_ZOOM;
+float Engine::MIN_ZOOM;
+float Engine::CAMERA_SENSITIVITY = 15.f;
+float Engine::ZOOM_FACTOR = 1.f;
 std::vector<std::vector<Tile>> Engine::saveLoader(std::vector<Allegiance>& allegiances)
 {
 	std::ifstream saveFile;
@@ -11,11 +15,11 @@ std::vector<std::vector<Tile>> Engine::saveLoader(std::vector<Allegiance>& alleg
 	allegiances[0].setName(nameLeft);
 	allegiances[1].setName(nameRight);
 
-	m_allegiance1.setString(nameLeft);
-	m_allegiance2.setString(nameRight);
+	allegiance1.setString(nameLeft);
+	allegiance2.setString(nameRight);
 
 	std::vector <std::vector <Tile> > tiles;
-
+	
 	int tileX, tileY;
 	saveFile >> tileX >> tileY;
 
@@ -42,22 +46,30 @@ std::vector<std::vector<Tile>> Engine::saveLoader(std::vector<Allegiance>& alleg
 	return tiles;
 }
 
+//Easier than hard coding everything in the run method
 void Engine::equipmentStatSetter()
 {
-	infantryRes.push_back(Researchable("graphics/kar98k.png", 0.f, 0.f, 15.f, 5.f, 90.f, sf::Vector2f(0, 0), 10));
-	infantryRes.push_back(Researchable("graphics/mp40.png", 0.f, 0.f, 30.f, 10.f, 79.f, sf::Vector2f(0, 100), 100));
-	infantryRes.push_back(Researchable("graphics/panzerschreck.png", 0.f, 60.f, 5.f, 20.f, 85.f, sf::Vector2f(0, 200), 200));
-	infantryRes.push_back(Researchable("graphics/panzerfaust.png", 0.f, 80.f, 2.f, 20.f, 80.f, sf::Vector2f(0, 300), 400));
-	tankRes.push_back(Researchable("graphics/panzer_3_b.png", 30.f, 45.f, 25.f, 190.f, 92.f, sf::Vector2f(200, 0), 150));
-	tankRes.push_back(Researchable("graphics/panzer_4_g.png", 60.f, 90.f, 27.f, 240.f, 89.f, sf::Vector2f(200, 100), 150));
-	tankRes.push_back(Researchable("graphics/panther.png", 100.f, 145.f, 27.f, 320.f, 74.f, sf::Vector2f(200, 200), 400));
-	tankRes.push_back(Researchable("graphics/tiger_2_p.png", 130.f, 180.f, 40.f, 550.f, 60.f, sf::Vector2f(200, 300), 800));
-	tankRes.push_back(Researchable("graphics/tiger_2_h.png", 160.f, 180.f, 40.f, 600.f, 65.f, sf::Vector2f(200, 400), 800));
-	antiTankRes.push_back(Researchable("graphics/anti_tank.png", 0.f, 80.f, 2.f, 20.f, 80.f, sf::Vector2f(400, 0), 400));
+	allResearch.push_back(Researchable("graphics/kar98k.png", 0.f, 0.f, 15.f, 5.f, 90.f, sf::Vector2f(300, 100), 10, -1));
+	allResearch.push_back(Researchable("graphics/mp40.png", 0.f, 0.f, 30.f, 10.f, 79.f, sf::Vector2f(100, 300), 100, 0));
+	allResearch.push_back(Researchable("graphics/panzerschreck.png", 0.f, 60.f, 5.f, 20.f, 85.f, sf::Vector2f(100, 500), 200, 1));
+	allResearch.push_back(Researchable("graphics/panzerfaust.png", 0.f, 80.f, 2.f, 20.f, 80.f, sf::Vector2f(100, 700), 400, 2));
+	allResearch.push_back(Researchable("graphics/anti_tank.png", 0.f, 80.f, 2.f, 20.f, 80.f, sf::Vector2f(100, 900), 400, 3));
+	allResearch.push_back(Researchable("graphics/panzer_3_b.png", 30.f, 45.f, 25.f, 190.f, 92.f, sf::Vector2f(300, 300), 150, 0));
+	allResearch.push_back(Researchable("graphics/panzer_4_g.png", 60.f, 90.f, 27.f, 240.f, 89.f, sf::Vector2f(300, 500), 150, 5));
+	allResearch.push_back(Researchable("graphics/panther.png", 100.f, 145.f, 27.f, 320.f, 74.f, sf::Vector2f(300, 700), 400, 6));
+	allResearch.push_back(Researchable("graphics/tiger_2_p.png", 130.f, 180.f, 40.f, 550.f, 60.f, sf::Vector2f(500, 500), 800, 6));
+	allResearch.push_back(Researchable("graphics/tiger_2_h.png", 160.f, 180.f, 40.f, 600.f, 65.f, sf::Vector2f(500, 700), 800, 8));
+	allResearch.push_back(Researchable("graphics/maus.png", 0.f, 80.f, 2.f, 20.f, 80.f, sf::Vector2f(500, 900), 400, 9));
 }
 
-void Engine::input(sf::RenderWindow& window, sf::View& hudView, sf::View& uiView, sf::View& mapView, sf::Vector2f resolution, e_tab& tabStatus, sf::Event& event)
+//the general input method that runs every frame
+void Engine::input(sf::RenderWindow& window, std::vector<sf::View>& views, sf::Vector2f resolution, e_tab& tabStatus, sf::Event& event)
 {
+	//To make the code more readable
+	sf::View& mapView = views[static_cast<int>(e_views::MAP)];
+	sf::View& hudView = views[static_cast<int>(e_views::HUD)];
+	sf::View& resViewLeft = views[static_cast<int>(e_views::RESEARCH_LEFT)];
+	sf::View& resViewRight = views[static_cast<int>(e_views::RESEARCH_RIGHT)];
 	while (window.pollEvent(event)) {
 		switch (event.type) 
 		{   
@@ -69,48 +81,65 @@ void Engine::input(sf::RenderWindow& window, sf::View& hudView, sf::View& uiView
 			case sf::Event::MouseButtonPressed:
 				sf::Vector2i screenPosition = sf::Mouse::getPosition(window);
 				if (event.mouseButton.button == sf::Mouse::Left) {
-					if (screenPosition.y <= (resolution.y * 0.15)) {
+					if (screenPosition.y <= (resolution.y * 0.1f)) {
 						hudInput(window.mapPixelToCoords(screenPosition, hudView), tabStatus);
 					}
 					else if (tabStatus == e_tab::UNITS) {
-						//noneInput(window.mapPixelToCoords(screenPosition, mapView), tabStatus, true);
+						
 					}
 					else if (tabStatus == e_tab::RESEARCH) {
-						researchInput(window.mapPixelToCoords(screenPosition, uiView));
+						researchInput(window, views, screenPosition);
 					}
 					else if (tabStatus == e_tab::PRODUCTION) {
-						//FIXME
-						//tileInput();
+					
 					}
 				}
 				else if (event.mouseButton.button == sf::Mouse::Right){
 					if (tabStatus == e_tab::UNITS) {
-						//noneInput(window.mapPixelToCoords(screenPosition, mapView), tabStatus, false);
+						
 					}
 				}
 				break;
 		}
 	}
+	if (tabStatus == e_tab::UNITS) {
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::W) && mapView.getCenter().y > CAMERA_SENSITIVITY) {
+			mapView.setCenter(sf::Vector2f(mapView.getCenter().x, mapView.getCenter().y - CAMERA_SENSITIVITY));
+		}
+		else if (sf::Keyboard::isKeyPressed(sf::Keyboard::S) && mapView.getCenter().y < (mapSize.y - CAMERA_SENSITIVITY)) {
+			mapView.setCenter(sf::Vector2f(mapView.getCenter().x, mapView.getCenter().y + CAMERA_SENSITIVITY));
+		}
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::A) && mapView.getCenter().x > CAMERA_SENSITIVITY) {
+			mapView.setCenter(sf::Vector2f(mapView.getCenter().x - CAMERA_SENSITIVITY, mapView.getCenter().y));
+		}
+		else if (sf::Keyboard::isKeyPressed(sf::Keyboard::D) && mapView.getCenter().x < (mapSize.x - CAMERA_SENSITIVITY)) {
+			mapView.setCenter(sf::Vector2f(mapView.getCenter().x + CAMERA_SENSITIVITY, mapView.getCenter().y));
+		}
+	}
+	else if (tabStatus == e_tab::RESEARCH) {
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::W) && resViewLeft.getCenter().y > (CAMERA_SENSITIVITY + resolution.y * 0.45f)) {
+			resViewLeft.setCenter(sf::Vector2f(resViewLeft.getCenter().x, resViewLeft.getCenter().y - CAMERA_SENSITIVITY));
+		}
+		else if (sf::Keyboard::isKeyPressed(sf::Keyboard::S) && resViewLeft.getCenter().y < (researchBackgroundLeft.getSize().y - CAMERA_SENSITIVITY - resolution.y * 0.45f)) {
+			resViewLeft.setCenter(sf::Vector2f(resViewLeft.getCenter().x, resViewLeft.getCenter().y + CAMERA_SENSITIVITY));
+		}
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::A) && resViewLeft.getCenter().x > (CAMERA_SENSITIVITY + resolution.x * 0.2f)) {
+			resViewLeft.setCenter(sf::Vector2f(resViewLeft.getCenter().x - CAMERA_SENSITIVITY, resViewLeft.getCenter().y));
+		}
+		else if (sf::Keyboard::isKeyPressed(sf::Keyboard::D) && resViewLeft.getCenter().x < (researchBackgroundLeft.getSize().x - CAMERA_SENSITIVITY - resolution.x * 0.2f)) {
+			resViewLeft.setCenter(sf::Vector2f(resViewLeft.getCenter().x + CAMERA_SENSITIVITY, resViewLeft.getCenter().y));
+		}
+		researchFrameLeft.setPosition(resViewLeft.getCenter());
+	}
 }
 
-void Engine::researchInput(sf::Vector2f mouseGlobalPosition)
+void Engine::researchInput(sf::RenderWindow& window, std::vector<sf::View> views, sf::Vector2i mouseLocalPosition)
 {
+	sf::Vector2f mouseGlobalPosition = window.mapPixelToCoords(mouseLocalPosition, views[static_cast<int>(e_views::RESEARCH_LEFT)]);
 	sf::FloatRect bounds;
-	for (auto& res : infantryRes) {
+	for (auto& res : allResearch) {
 		bounds = res.getEquipmentBackground().getGlobalBounds();
-		if (bounds.contains(mouseGlobalPosition)) {
-			res.doResearch();
-		}
-	}
-	for (auto& res : tankRes) {
-		bounds = res.getEquipmentBackground().getGlobalBounds();
-		if (bounds.contains(mouseGlobalPosition)) {
-			res.doResearch();
-		}
-	}
-	for (auto& res : antiTankRes) {
-		bounds = res.getEquipmentBackground().getGlobalBounds();
-		if (bounds.contains(mouseGlobalPosition)) {
+		if (bounds.contains(mouseGlobalPosition) && (res.prevResearchVectorLocation == -1 || allResearch[res.prevResearchVectorLocation].isResearched() == e_researchStatus::RESEARCHED)) {
 			res.doResearch();
 		}
 	}
@@ -118,13 +147,22 @@ void Engine::researchInput(sf::Vector2f mouseGlobalPosition)
 
 void Engine::zoom(sf::View& mapView, float scrollDelta)
 {
-	mapView.zoom(1 + m_ZOOM_SENSITIVITY * scrollDelta);
+	if (ZOOM_FACTOR < MAX_ZOOM && scrollDelta > 0) {
+		ZOOM_FACTOR += ZOOM_SENSITIVITY;
+		if (ZOOM_FACTOR > MAX_ZOOM)ZOOM_FACTOR = MAX_ZOOM;
+		mapView.setSize(resolution.x * ZOOM_FACTOR, resolution.y * 0.9 * ZOOM_FACTOR);
+	}
+	else if (ZOOM_FACTOR > MIN_ZOOM && scrollDelta < 0) {
+		ZOOM_FACTOR -= ZOOM_SENSITIVITY;
+		if (ZOOM_FACTOR < MIN_ZOOM)ZOOM_FACTOR = MIN_ZOOM;
+		mapView.setSize(resolution.x * ZOOM_FACTOR, resolution.y * 0.9 * ZOOM_FACTOR);
+	}
 }
 
 void Engine::hudInput(sf::Vector2f mouseHudPos, e_tab& tab)
 {
-	if (mouseHudPos.y > (m_resolution.y * 0.075f)) {
-		switch (int (mouseHudPos.x / (m_resolution.x / 6))) {
+	if (mouseHudPos.y > (resolution.y * 0.05f)) {
+		switch (int (mouseHudPos.x / (resolution.x / 6))) {
 		    case 0:
 				tab = e_tab::UNITS;
 				break;
@@ -158,24 +196,36 @@ void Engine::run()
 	allegiances.push_back(Allegiance());
     std::vector <std::vector <Tile> > tiles = saveLoader(allegiances);
 
-	m_tilesNums = sf::Vector2f(tiles.size(), tiles[0].size());
-	m_mapSize = sf::Vector2f(m_tilesNums.x * m_TILE_SIZE, m_tilesNums.y * m_TILE_SIZE);
+	tilesNums = sf::Vector2i(tiles.size(), tiles[0].size());
+	mapSize = sf::Vector2f(tilesNums.x * TILE_SIZE, tilesNums.y * TILE_SIZE);
 	e_gameStat gameStatus = e_gameStat::RUNNING;
-
+	//Max zoom and min zoom and setting the blue map background ( Did this way to prevent size distortion because of the different ratios between the map size and screen size)
+	if (mapSize.x / resolution.x < mapSize.y / resolution.y) {
+		MAX_ZOOM = mapSize.y / resolution.y / 0.9f;
+		MIN_ZOOM = mapSize.y / resolution.y / 0.9f / 4.f;
+	}
+	else {
+		MAX_ZOOM = mapSize.x / resolution.x;
+		MIN_ZOOM = mapSize.x / resolution.x / 4.f;
+	}
+	//Setting map background up
+	mapBackground.setPosition(sf::Vector2f(-resolution.x / 2 * MAX_ZOOM, -resolution.y * 0.9f / 2 * MAX_ZOOM));
+	mapBackground.setSize(sf::Vector2f((resolution.x + mapSize.x) * MAX_ZOOM, (resolution.y * 0.9 + mapSize.y) * MAX_ZOOM));
 	//Creating the window
-	sf::VideoMode vm(m_resolution.x, m_resolution.y);
+	sf::VideoMode vm(resolution.x, resolution.y);
 	sf::RenderWindow window(vm, "Logistical Nightmare", sf::Style::Fullscreen);
-	window.setFramerateLimit(30);
+	window.setFramerateLimit(90);
 
-	//Views
-	sf::View hudView(sf::FloatRect(0, 0, m_resolution.x, m_resolution.y * 0.15f));
-	hudView.setViewport(sf::FloatRect(0, 0, 1, 0.15f));
-	sf::View uiView(sf::FloatRect(0, 0, m_resolution.x, m_resolution.y * 0.85f));
-	uiView.setViewport(sf::FloatRect(0, 0.15f, 1, 0.85f));
-	sf::View mapView;
-	mapView.setViewport(sf::FloatRect(0, 0.15f, 1, 0.85f));
-	mapView.setSize(m_resolution.x, m_resolution.y * 0.85f);
-	mapView.setCenter(m_mapSize.x / 2, m_mapSize.y / 2);
+	//Views (don't mess with the push_back order)
+	std::vector<sf::View> views;
+	views.push_back(sf::View(sf::FloatRect(0, 0, resolution.x, resolution.y * 0.1f)));
+	views[0].setViewport(sf::FloatRect(0, 0, 1, 0.1f));
+	views.push_back(sf::View(sf::Vector2f(mapSize.x / 2, mapSize.y / 2), sf::Vector2f(resolution.x, resolution.y * 0.9f)));
+	views[1].setViewport(sf::FloatRect(0, 0.1f, 1, 0.9f));
+	views.push_back(sf::View(sf::FloatRect(0, 0, resolution.x * 0.4f, resolution.y * 0.9f)));
+	views[2].setViewport(sf::FloatRect(0.f, 0.1f, 0.4f, 0.9f));
+	views.push_back(sf::View(sf::FloatRect(0, 0, resolution.x * 0.1f, resolution.y * 0.9f)));
+	views[3].setViewport(sf::FloatRect(0.9f, 0.1f, 0.1f, 0.9f));
 
 	//Tab status
 	e_tab tabStatus = e_tab::UNITS;
@@ -200,21 +250,14 @@ void Engine::run()
 			for (int i = 0; i < 2; i++) {
 				allegiances[i].update(deltaTime, tiles);
 			}
-			m_allegianceCP1.setString("CP: " + std::to_string(int(allegiances[0].getConstructionPoints())));
-			m_allegianceCP2.setString("CP: " + std::to_string(int(allegiances[1].getConstructionPoints())));
 			//updating the research
-			for (auto& res : infantryRes) {
-				res.update();
+			for (auto& res : allResearch) {
+				if (res.isResearched() == e_researchStatus::IN_PROGRESS) {
+					res.update();
+				}
 			}
-			for (auto& res : tankRes) {
-				res.update();
-			}
-			for (auto& res : antiTankRes) {
-				res.update();
-			}
-
-			input(window, hudView, uiView, mapView, m_resolution, tabStatus, event);
-			drawToWindow(window, hudView, uiView, mapView, tabStatus, tiles);
+			input(window, views, resolution, tabStatus, event);
+			drawToWindow(window, views, tabStatus, tiles);
 			window.display();
 			window.clear();
 		}

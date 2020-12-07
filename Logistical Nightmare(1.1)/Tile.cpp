@@ -4,15 +4,15 @@
 #include<iostream>
 Tile::Tile(int terrain, sf::Vector2i pos)
 {
-	m_terrainSprite.setPosition(Renderer::m_TILE_SIZE * pos.x, Renderer::m_TILE_SIZE * pos.y + Renderer::m_TILE_SIZE / 2);
+	m_terrainSprite.setPosition(Renderer::TILE_SIZE * pos.x, Renderer::TILE_SIZE * pos.y + Renderer::TILE_SIZE / 2);
 	m_terrainSprite.setTexture(TextureHolder::getTexture("graphics/" + terrainNumToString(terrain) + ".png"));
 	m_terrainSprite.setScale(0.5f, 0.5f);
 
-	m_factorySprite.setPosition(Renderer::m_TILE_SIZE * pos.x, Renderer::m_TILE_SIZE * pos.y);
+	m_factorySprite.setPosition(Renderer::TILE_SIZE * pos.x, Renderer::TILE_SIZE * pos.y);
 	m_factorySprite.setTexture(TextureHolder::getTexture("graphics/factory.png"));
 	m_factorySprite.setScale(0.5f, 0.5f);
 
-	m_tileSprite.setPosition(Renderer::m_TILE_SIZE * pos.x, Renderer::m_TILE_SIZE * pos.y);
+	m_tileSprite.setPosition(Renderer::TILE_SIZE * pos.x, Renderer::TILE_SIZE * pos.y);
 	m_tileSprite.setTexture(TextureHolder::getTexture("graphics/map_background.png"));
 	m_tileSprite.setScale(0.5f, 0.5f);
 

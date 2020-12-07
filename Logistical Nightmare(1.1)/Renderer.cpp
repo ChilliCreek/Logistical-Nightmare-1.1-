@@ -1,116 +1,124 @@
 #include "pch.h"
 #include "Renderer.h"
 
+#define PI 3.14159265
+
 //constants initialization
-const float Renderer::m_TIME_DILATION = 10000.f;
-const float Renderer::m_ZOOM_SENSITIVITY = 0.1f;
-const std::string Renderer::m_monthStrings[12] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
+float Renderer::TIME_DILATION = 10000.f;
+float Renderer::ZOOM_SENSITIVITY = 0.05f;
+sf::Font Renderer::font;
+sf::Vector2f Renderer::resolution;
+std::string Renderer::monthStrings[12] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
 
 Renderer::Renderer()
 {
 	//resolution 
-	m_resolution.x = sf::VideoMode::getDesktopMode().width;
-	m_resolution.y = sf::VideoMode::getDesktopMode().height;
+	resolution.x = sf::VideoMode::getDesktopMode().width;
+	resolution.y = sf::VideoMode::getDesktopMode().height;
 	//hud background
-	sf::Color brown(150, 75, 0, 255);
-	m_hudBackground.setFillColor(brown);
-	m_hudBackground.setPosition(0, 0);
-	m_hudBackground.setSize(sf::Vector2f(m_resolution.x, m_resolution.y * 0.15f));
+	hudBackground.setFillColor(sf::Color::Black);
+	hudBackground.setPosition(0, 0);
+	hudBackground.setSize(sf::Vector2f(resolution.x, resolution.y * 0.1f));
 	//research background
-	m_researchBackground.setFillColor(brown);
-	m_researchBackground.setPosition(0, 0);
-	m_researchBackground.setSize(sf::Vector2f(600, 600));
-	//map background
-	m_mapBackground.setFillColor(sf::Color::Green);
-	m_mapBackground.setPosition(0, 0);
-	m_mapBackground.setSize(m_mapSize);
+	sf::Color vwSatinSilver(182, 194, 204);
+	researchBackgroundLeft.setFillColor(vwSatinSilver);
+	researchBackgroundLeft.setPosition(0, 0);
+	researchBackgroundLeft.setSize(sf::Vector2f(2000.f,1200.f));
+	sf::Color chryslerDarkSilver(104, 112, 124);
+	researchBackgroundRight.setFillColor(chryslerDarkSilver);
+	researchBackgroundRight.setPosition(0, 0);
+	researchBackgroundRight.setSize(sf::Vector2f(resolution.x * 0.1f, resolution.y * 0.9f));
+	researchBackgroundRight.setOutlineColor(sf::Color::Black);
+	researchBackgroundRight.setOutlineThickness(-2);
+	//Research windows' frames
+	researchFrameLeft.setOutlineColor(sf::Color::Black);
+	researchFrameLeft.setOutlineThickness(-5);
+	researchFrameLeft.setSize(sf::Vector2f(resolution.x * 0.4f, resolution.y * 0.9f));
+	researchFrameLeft.setOrigin(sf::Vector2f(resolution.x * 0.2f, resolution.y * 0.45f));
+	researchFrameLeft.setPosition(sf::Vector2f(resolution.x * 0.2f, resolution.y * 0.45f));
+	researchFrameLeft.setFillColor(sf::Color(0, 0, 0, 0));
+	//blue map background
+	sf::Color seaBlue(0, 105, 248);
+	mapBackground.setFillColor(seaBlue);
 	//font set
-	m_font.loadFromFile("font/Stanberry.ttf");
+	font.loadFromFile("font/Stanberry.ttf");
 	//Allegiance names
-	m_allegiance1.setFont(m_font);
-	m_allegiance2.setFont(m_font);
-	m_allegiance1.setCharacterSize(30);
-	m_allegiance2.setCharacterSize(30);
-	m_allegiance1.setPosition(20, 20);
-	m_allegiance2.setPosition(m_resolution.x * 0.85f, 20);
+	allegiance1.setFont(font);
+	allegiance2.setFont(font);
+	allegiance1.setCharacterSize(25);
+	allegiance2.setCharacterSize(25);
+	allegiance1.setPosition(10, 10);
+	allegiance2.setPosition(resolution.x * 0.85f, 10);
 	//Tabs
-	m_tabs[0].setString("Map");
-	m_tabs[1].setString("Research");
-	m_tabs[2].setString("Tile");
-	m_tabs[3].setString("Build");
-	m_tabs[4].setString("Storage");
-	m_tabs[5].setString("Units");
-	//Construction points display
-	m_allegianceCP1.setFont(m_font);
-	m_allegianceCP2.setFont(m_font);
-	m_allegianceCP1.setCharacterSize(15);
-	m_allegianceCP2.setCharacterSize(15);
-	m_allegianceCP1.setPosition(200, 20);
-	m_allegianceCP2.setPosition(m_resolution.x * 0.8f, 20);
+	sf::Color gold(255, 223, 0, 255);
+	tabTexts[0].setString("Map");
+	tabTexts[1].setString("Research");
+	tabTexts[2].setString("Production");
+	tabTexts[3].setString("Logistics");
+	tabTexts[4].setString("Building");
+	tabTexts[5].setString("Options");
 	for (int i = 0; i < 6; i++) {
-		m_tabs[i].setFillColor(sf::Color::Black);
-		m_tabs[i].setCharacterSize(25);
-		m_tabs[i].setPosition((m_resolution.x / 6) * i + m_resolution.x / 12, m_resolution.y * 0.125);
-		m_tabs[i].setFont(m_font);
-		m_tabs[i].setOrigin(m_tabs[i].getLocalBounds().width / 2, m_tabs[i].getLocalBounds().height / 2);
+		tabTexts[i].setFillColor(sf::Color::Blue);
+		tabTexts[i].setCharacterSize(20);
+		tabTexts[i].setPosition((resolution.x / 6.f) * i + resolution.x / 12.f, resolution.y * 0.075f);
+		tabTexts[i].setFont(font);
+		tabTexts[i].setOrigin(tabTexts[i].getLocalBounds().width / 2, tabTexts[i].getLocalBounds().height / 2);
 	}
 	for (int i = 0; i < 6; i++) {
-		m_tabButtons[i].setTexture(TextureHolder::getTexture("graphics/tab_button.png"));
-		m_tabButtons[i].setPosition((m_resolution.x / 6) * i + m_resolution.x / 12, m_resolution.y * 0.125);
-		m_tabButtons[i].setOrigin(m_tabButtons[i].getLocalBounds().width / 2, m_tabButtons[i].getLocalBounds().height / 2);
+		tabButtons[i].setTexture(TextureHolder::getTexture("graphics/tab_button.png"));
+		tabButtons[i].setPosition((resolution.x / 6.f) * i + resolution.x / 12.f, resolution.y * 0.075f);
+		tabButtons[i].setOrigin(tabButtons[i].getLocalBounds().width / 2, tabButtons[i].getLocalBounds().height / 2);
 	}
 	//runTime
-	m_time.setCharacterSize(30);
-	m_time.setFont(m_font);
-	m_time.setPosition(m_resolution.x * 0.45f, 0);
+	timeAndDate.setCharacterSize(20);
+	timeAndDate.setFont(font);
+	timeAndDate.setPosition(resolution.x * 0.25f, 0);
 }
 
-void Renderer::drawToWindow(sf::RenderWindow& window, sf::View& hudView, sf::View& uiView, sf::View& mapView, e_tab& tabs, std::vector <std::vector <Tile> >& tiles)
+void Renderer::drawToWindow(sf::RenderWindow& window, std::vector<sf::View>& views, e_tab& tabs, std::vector <std::vector <Tile> >& tiles)
 {
+	drawHudToWindow(window, views[static_cast<int>(e_views::HUD)]);
 	switch (tabs) {
 	case e_tab::UNITS:
-		drawMapToWindow(window, mapView, tiles);
+		drawMapToWindow(window, views[static_cast<int>(e_views::MAP)], tiles);
 		break;
 	case e_tab::RESEARCH:
-		drawResearchToWindow(window, uiView);
+		drawMapToWindow(window, views[static_cast<int>(e_views::MAP)], tiles);
+		drawResearchToWindow(window, views);
 		break;
 	case e_tab::PRODUCTION:
-		//drawTileToWindow(window, uiView);
 		break;
 	case e_tab::LOGISTICS:
-		//drawFactoryToWindow(window, uiView);
 		break;
 	case e_tab::BUILDING:
 		break;
 	case e_tab::OPTIONS:
 		break;
 	}
-	drawHudToWindow(window, hudView);
 }
 
 void Renderer::drawHudToWindow(sf::RenderWindow& window, sf::View& hudView)
 {
 	window.setView(hudView);
-	window.draw(m_hudBackground);
-	window.draw(m_allegiance1);
-	window.draw(m_allegiance2);
-	window.draw(m_allegianceCP1);
-	window.draw(m_allegianceCP2);
+	window.draw(hudBackground);
+	window.draw(allegiance1);
+	window.draw(allegiance2);
 	for (int i = 0; i < 6; i++) {
-		window.draw(m_tabButtons[i]);
+		window.draw(tabButtons[i]);
 	}
 	for (int i = 0; i < 6; i++) {
-		window.draw(m_tabs[i]);
+		window.draw(tabTexts[i]);
 	}
-	m_time.setString(Renderer::secondsToDateAndTime(runTime));
-	window.draw(m_time);
+	timeAndDate.setString(Renderer::secondsToDateAndTime(runTime));
+	window.draw(timeAndDate);
 }
 
 void Renderer::drawMapToWindow(sf::RenderWindow& window, sf::View& mapView, std::vector <std::vector <Tile> >& tiles)
 {
 	window.setView(mapView);
-	for (int i = 0; i < int(m_tilesNums.x); i++) {
-		for (int j = 0; j < int(m_tilesNums.y); j++) {
+	window.draw(mapBackground);
+	for (int i = 0; i < tilesNums.x; i++) {
+		for (int j = 0; j < tilesNums.y; j++) {
 			window.draw(tiles[i][j].getTileSprite());
 			if (tiles[i][j].hasFactory())window.draw(tiles[i][j].getFactorySprite());;
 			window.draw(tiles[i][j].getTerrainSprite());
@@ -118,28 +126,52 @@ void Renderer::drawMapToWindow(sf::RenderWindow& window, sf::View& mapView, std:
 	}
 }
 
-void Renderer::drawResearchToWindow(sf::RenderWindow& window, sf::View& uiView)
+void Renderer::drawResearchToWindow(sf::RenderWindow& window, std::vector<sf::View>& views)
 {
-	window.setView(uiView);
-	window.draw(m_researchBackground);
-	for (auto& res : infantryRes) {
+	window.setView(views[static_cast<int>(e_views::RESEARCH_RIGHT)]);
+	window.draw(researchBackgroundRight);
+	int i = 0;
+	for (auto& res : allResearch) {
+		if (res.isResearched() == e_researchStatus::IN_PROGRESS) {
+			sf::RectangleShape recEquipmentBackground = res.getEquipmentBackground();
+			recEquipmentBackground.setPosition(0, recEquipmentBackground.getLocalBounds().height * i);
+			sf::RectangleShape recProgressBarFull = res.getProgressBarFull();
+			recProgressBarFull.setPosition(0, recEquipmentBackground.getLocalBounds().height * i);
+			sf::RectangleShape recProgressBarLeft = res.getProgressBarLeft();
+			recProgressBarLeft.setPosition(0, recEquipmentBackground.getLocalBounds().height * i);
+			sf::Sprite resSprite = res.getEquipment().getEquipmentSprite();
+			resSprite.setPosition(0, recEquipmentBackground.getLocalBounds().height * i);
+			window.draw(recEquipmentBackground);
+			window.draw(resSprite);
+			window.draw(recProgressBarFull);
+			window.draw(recProgressBarLeft);
+			i++;
+		}
+	}
+	window.setView(views[static_cast<int>(e_views::RESEARCH_LEFT)]);
+	window.draw(researchBackgroundLeft);
+	sf::RectangleShape arrow;
+	arrow.setFillColor(sf::Color::Black);
+	for (auto& res : allResearch) {
+		if (res.prevResearchVectorLocation != -1) {
+			arrow.setSize(sf::Vector2f(std::sqrt(std::powf(allResearch[res.prevResearchVectorLocation].getEquipmentBackground().getGlobalBounds().top - res.getEquipmentBackground().getGlobalBounds().top, 2) + std::powf(allResearch[res.prevResearchVectorLocation].getEquipmentBackground().getGlobalBounds().left - res.getEquipmentBackground().getGlobalBounds().left, 2)), 5.f));
+			arrow.setPosition(res.getEquipmentBackground().getGlobalBounds().left + res.getEquipmentBackground().getGlobalBounds().width / 2, res.getEquipmentBackground().getGlobalBounds().top + res.getEquipmentBackground().getGlobalBounds().height / 2);
+			arrow.setRotation(90 - std::atan2f(allResearch[res.prevResearchVectorLocation].getEquipmentBackground().getGlobalBounds().left - res.getEquipmentBackground().getGlobalBounds().left, allResearch[res.prevResearchVectorLocation].getEquipmentBackground().getGlobalBounds().top - res.getEquipmentBackground().getGlobalBounds().top) * 180 / PI);
+			window.draw(arrow);
+		}
+	}
+	for (auto& res : allResearch) {
 		window.draw(res.getEquipmentBackground());
 		window.draw(res.getEquipment().getEquipmentSprite());
+		window.draw(res.getResTimeText());
 	}
-	for (auto& res : tankRes) {
-		window.draw(res.getEquipmentBackground());
-		window.draw(res.getEquipment().getEquipmentSprite());
-	}
-	for (auto& res : antiTankRes) {
-		window.draw(res.getEquipmentBackground());
-		window.draw(res.getEquipment().getEquipmentSprite());
-	}
+	window.draw(researchFrameLeft);
 }
 
 std::string Renderer::secondsToDateAndTime(float sec)
 {
 	e_tab res = e_tab(1);
-	sec = sec * m_TIME_DILATION;
+	sec = sec * TIME_DILATION;
 	float days = (sec / 86400.f);
 	int year = 1;
 	std::stringstream ss;
@@ -225,6 +257,6 @@ std::string Renderer::secondsToDateAndTime(float sec)
 		}
 	}
 	int hours = (days - float(int(days))) / (1.f / 24.f);
-	ss << m_monthStrings[month - 1] << " " << int(days) + 1 << " " << (year + 1940) << "\n    " << hours << ":00";
+	ss << monthStrings[month - 1] << " " << int(days) + 1 << " " << (year + 1940) << "  " << hours << ":00";
 	return ss.str();
 }

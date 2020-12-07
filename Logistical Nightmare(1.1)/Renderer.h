@@ -12,43 +12,40 @@
 #include"Researchable.h"
 
 enum class e_tab { UNITS, RESEARCH, PRODUCTION, LOGISTICS, BUILDING, OPTIONS};
+enum class e_gameStat { RUNNING, PAUSED };
+enum class e_views {HUD, MAP, RESEARCH_LEFT, RESEARCH_RIGHT, PRODUCTION, LOGISTICS, BUILDING, OPTIONS};
 
 class Renderer
 {
 protected:
-	sf::Vector2f m_tilesNums;
-	sf::Vector2f m_mapSize;
-	sf::Vector2f m_selectedTile;
-	sf::Vector2f m_resolution;
-	std::vector<Researchable> infantryRes;
-	std::vector<Researchable> tankRes;
-	std::vector<Researchable> antiTankRes;
-	sf::RectangleShape m_hudBackground;
-	sf::RectangleShape m_researchBackground;
-	sf::RectangleShape m_mapBackground;
-	sf::Text m_allegiance1;
-	sf::Text m_allegiance2;
-	sf::Text m_tabs[6];
-	sf::Text m_time;
-	sf::Text m_allegianceCP1;
-	sf::Text m_allegianceCP2;
+	sf::Vector2i tilesNums;
+	sf::Vector2f mapSize;
+	sf::Vector2f selectedTile;
+	std::vector<Researchable> allResearch;
+	sf::RectangleShape hudBackground;
+	sf::RectangleShape researchBackgroundLeft;
+	sf::RectangleShape researchFrameLeft;
+	sf::RectangleShape researchBackgroundRight;
+	sf::RectangleShape mapBackground;
+	sf::Text allegiance1;
+	sf::Text allegiance2;
+	sf::Text tabTexts[6];
+	sf::Text timeAndDate;
 	TextureHolder textureHolder;
-	sf::Sprite m_tabButtons[6];
-	sf::Font m_font;
+	sf::Sprite tabButtons[6];
 	float runTime = 0;
-	static const float m_ZOOM_SENSITIVITY;
-	static const float m_TIME_DILATION;
-	static const std::string m_monthStrings[12];
 public:
-	static const int m_TILE_SIZE = 200;
+	static sf::Font font;
+	static sf::Vector2f resolution;
+	static float ZOOM_SENSITIVITY;
+	static float TIME_DILATION;
+	static std::string monthStrings[12];
+	static const int TILE_SIZE = 200;
 	Renderer();
 	//The draw methods for the engine
-	void drawToWindow(sf::RenderWindow& window, sf::View& hudView, sf::View& uiView, sf::View& mapView, e_tab& tabs, std::vector <std::vector <Tile> >& tiles);
+	void drawToWindow(sf::RenderWindow& window, std::vector<sf::View>& views, e_tab& tabs, std::vector <std::vector <Tile> >& tiles);
 	void drawHudToWindow(sf::RenderWindow& window, sf::View& hudView);
-	void drawResearchToWindow(sf::RenderWindow& window, sf::View& uiView);
-	//void drawFactoryToWindow(RenderWindow&, View&);
-	//void drawTileToWindow(RenderWindow&, View&);
 	void drawMapToWindow(sf::RenderWindow& window, sf::View& mapView, std::vector <std::vector <Tile> >& tiles);
-	//void drawStorageToWindow(RenderWindow&, View&);
+	void drawResearchToWindow(sf::RenderWindow& window, std::vector<sf::View>& views);
 	static std::string secondsToDateAndTime(float sec);
 };

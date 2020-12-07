@@ -10,8 +10,8 @@ class Allegiance
 private:
 	std::vector <sf::Vector2i> m_tilesLoc;
 	std::string m_name;
-	float m_constructionPoints = 0;
-	int m_factoryNumber = 0;
+	float m_constructionPoints;
+	int m_factoryNumber;
 	std::map <std::string, int> m_equipmentStorage;
 public:
 	void addFactoryNumber();

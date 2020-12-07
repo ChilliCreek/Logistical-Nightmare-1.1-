@@ -1,7 +1,8 @@
 #include "pch.h"
 #include "Equipment.h"
+#include "Renderer.h"
 
-const float Equipment::m_TEXTURE_SCALE = 0.25f;
+float Equipment::m_TEXTURE_SCALE;
 
 std::string Equipment::getName() const
 {
@@ -23,7 +24,7 @@ float Equipment::getProductionCost() const
 	return m_productionCost;
 }
 
-sf::Sprite& Equipment::getEquipmentSprite()
+sf::Sprite Equipment::getEquipmentSprite()
 {
 	return m_equipmentSprite;
 }
@@ -37,6 +38,7 @@ Equipment::Equipment(std::string name, float armor, float antiArmor, float antiP
 	m_productionCost = productionCost;
 	m_reliability = reliability;
 	m_equipmentSprite.setTexture(TextureHolder::getTexture(m_name));
+	m_TEXTURE_SCALE = (Renderer::resolution.x * 0.1 - 2) / m_equipmentSprite.getLocalBounds().width;
 	m_equipmentSprite.setScale(m_TEXTURE_SCALE, m_TEXTURE_SCALE);
 }
 

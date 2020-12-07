@@ -12,12 +12,12 @@ private:
 	sf::Sprite m_equipmentSprite;
 	std::string m_name;
 public:
-	static const float m_TEXTURE_SCALE;
+	static float m_TEXTURE_SCALE;
 	std::string getName()const;
 	float getArmor()const;
 	float getReliability()const;
 	float getProductionCost()const;
-	sf::Sprite& getEquipmentSprite();
+	sf::Sprite getEquipmentSprite();
 	Equipment(std::string name, float armor, float antiArmor, float antiPersonnel, float productionCost, float reliability);
 	void setSpritePosition(sf::Vector2f position);
 };
