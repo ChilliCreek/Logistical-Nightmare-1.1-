@@ -19,7 +19,8 @@ public:
 	bool ifLost()const;
 	void update(float elapsedTime, std::vector <std::vector <Tile> >& tiles);
 	void setName(std::string&);
-	float getConstructionPoints()const;
+	float getConstructionPoints();
+	void setConstructionPoints(float constructionPt);
 	std::string getName()const;
 	Allegiance();
 };

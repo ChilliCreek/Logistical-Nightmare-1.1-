@@ -15,10 +15,11 @@ void Researchable::doResearch()
 		m_equipmentBackground.setOutlineColor(sf::Color::Yellow);
     }
 }
-void Researchable::update()
+void Researchable::update(int GAME_SPEED)
 {
+	m_resTimeCount += m_researchClock->restart().asSeconds() * GAME_SPEED;
 	if (m_researchClock != nullptr) {
-		if (m_researchClock->getElapsedTime().asSeconds() > m_RESEARCH_TIME_SEC) {
+		if (m_resTimeCount > m_RESEARCH_TIME_SEC) {
 			researchesInProgress--;
 			delete[] m_researchClock;
 			m_researchClock = nullptr;
@@ -26,7 +27,7 @@ void Researchable::update()
 			m_equipmentBackground.setOutlineColor(sf::Color::Green);
 		}
 		else {
-			m_progressBarLeft.setSize(sf::Vector2f(m_progressBarFull.getLocalBounds().width * m_researchClock->getElapsedTime().asSeconds() / m_RESEARCH_TIME_SEC, 10.f));
+			m_progressBarLeft.setSize(sf::Vector2f(m_progressBarFull.getLocalBounds().width * m_resTimeCount / m_RESEARCH_TIME_SEC, 10.f));
 		}
 	}
 }
@@ -48,7 +49,7 @@ Researchable::Researchable(std::string name, float armor, float antiArmor, float
 	m_researchStatus = e_researchStatus::NOT_RESEARCHED;
 	m_equipment.setSpritePosition(position);
 	m_researchClock = nullptr;
-	m_resTimeDays.setString(std::to_string(static_cast<int>(resTime * Renderer::TIME_DILATION / 86400.f)) + " days" );
+	m_resTimeDays.setString(std::to_string(static_cast<int>(resTime / 8.64f)) + " days" );
 	m_resTimeDays.setPosition(position.x + 4, position.y + 2);
 	m_resTimeDays.setCharacterSize(13);
 	m_resTimeDays.setFillColor(sf::Color::Black);

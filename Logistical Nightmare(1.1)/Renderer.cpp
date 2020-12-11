@@ -3,9 +3,10 @@
 
 #define PI 3.14159265
 
-//constants initialization
-float Renderer::TIME_DILATION = 10000.f;
+//initialization of static variables
+const float Renderer::TIME_DILATION = 2500.f;
 float Renderer::ZOOM_SENSITIVITY = 0.05f;
+int Renderer::GAME_SPEED = 4;
 sf::Font Renderer::font;
 sf::Vector2f Renderer::resolution;
 std::string Renderer::monthStrings[12] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
@@ -43,12 +44,12 @@ Renderer::Renderer()
 	//font set
 	font.loadFromFile("font/Stanberry.ttf");
 	//Allegiance names
-	allegiance1.setFont(font);
-	allegiance2.setFont(font);
-	allegiance1.setCharacterSize(25);
-	allegiance2.setCharacterSize(25);
-	allegiance1.setPosition(10, 10);
-	allegiance2.setPosition(resolution.x * 0.85f, 10);
+	allegianceText1.setFont(font);
+	allegianceText2.setFont(font);
+	allegianceText1.setCharacterSize(25);
+	allegianceText2.setCharacterSize(25);
+	allegianceText1.setPosition(10, 10);
+	allegianceText2.setPosition(resolution.x * 0.85f, 10);
 	//Tabs
 	sf::Color gold(255, 223, 0, 255);
 	tabTexts[0].setString("Map");
@@ -73,6 +74,15 @@ Renderer::Renderer()
 	timeAndDate.setCharacterSize(20);
 	timeAndDate.setFont(font);
 	timeAndDate.setPosition(resolution.x * 0.25f, 0);
+	//Set game speed
+	speedButtons.setTexture(TextureHolder::getTexture("graphics/speed_bar.png"));
+	speedButtons.setPosition(resolution.x * 0.4f, 5);
+	speedButtons.setScale(0.4f, 0.4f);
+	//Game speed buttons shading
+	gameSpeedButtonShade.setSize(sf::Vector2f(speedButtons.getLocalBounds().width / 5, speedButtons.getLocalBounds().height));
+	gameSpeedButtonShade.setFillColor(sf::Color(255, 255, 255, 96));
+	gameSpeedButtonShade.setScale(0.4f, 0.4f);
+	gameSpeedButtonShade.setPosition(resolution.x * 0.4f + speedButtons.getLocalBounds().width * 0.6f * 0.4f, speedButtons.getGlobalBounds().top);
 }
 
 void Renderer::drawToWindow(sf::RenderWindow& window, std::vector<sf::View>& views, e_tab& tabs, std::vector <std::vector <Tile> >& tiles)
@@ -84,9 +94,12 @@ void Renderer::drawToWindow(sf::RenderWindow& window, std::vector<sf::View>& vie
 		break;
 	case e_tab::RESEARCH:
 		drawMapToWindow(window, views[static_cast<int>(e_views::MAP)], tiles);
-		drawResearchToWindow(window, views);
+		drawResearchLeftToWindow(window, views);
+		drawResearchRightToWindow(window, views);
 		break;
+	case e_tab::PRODUCTION_CLICKED:
 	case e_tab::PRODUCTION:
+		drawProductionToWindow(window, views, tiles, tabs);
 		break;
 	case e_tab::LOGISTICS:
 		break;
@@ -101,8 +114,10 @@ void Renderer::drawHudToWindow(sf::RenderWindow& window, sf::View& hudView)
 {
 	window.setView(hudView);
 	window.draw(hudBackground);
-	window.draw(allegiance1);
-	window.draw(allegiance2);
+	window.draw(allegianceText1);
+	window.draw(allegianceText2);
+	window.draw(speedButtons);
+	window.draw(gameSpeedButtonShade);
 	for (int i = 0; i < 6; i++) {
 		window.draw(tabButtons[i]);
 	}
@@ -120,13 +135,13 @@ void Renderer::drawMapToWindow(sf::RenderWindow& window, sf::View& mapView, std:
 	for (int i = 0; i < tilesNums.x; i++) {
 		for (int j = 0; j < tilesNums.y; j++) {
 			window.draw(tiles[i][j].getTileSprite());
-			if (tiles[i][j].hasFactory())window.draw(tiles[i][j].getFactorySprite());;
+			if (tiles[i][j].hasFactory())window.draw(tiles[i][j].getFactorySprite());
 			window.draw(tiles[i][j].getTerrainSprite());
 		}
 	}
 }
 
-void Renderer::drawResearchToWindow(sf::RenderWindow& window, std::vector<sf::View>& views)
+void Renderer::drawResearchRightToWindow(sf::RenderWindow& window, std::vector<sf::View>& views)
 {
 	window.setView(views[static_cast<int>(e_views::RESEARCH_RIGHT)]);
 	window.draw(researchBackgroundRight);
@@ -148,6 +163,10 @@ void Renderer::drawResearchToWindow(sf::RenderWindow& window, std::vector<sf::Vi
 			i++;
 		}
 	}
+}
+
+void Renderer::drawResearchLeftToWindow(sf::RenderWindow& window, std::vector<sf::View>& views)
+{
 	window.setView(views[static_cast<int>(e_views::RESEARCH_LEFT)]);
 	window.draw(researchBackgroundLeft);
 	sf::RectangleShape arrow;
@@ -166,6 +185,29 @@ void Renderer::drawResearchToWindow(sf::RenderWindow& window, std::vector<sf::Vi
 		window.draw(res.getResTimeText());
 	}
 	window.draw(researchFrameLeft);
+}
+
+void Renderer::drawOptionsToWindow(sf::RenderWindow & window, std::vector<sf::View>& views)
+{
+
+}
+
+void Renderer::drawProductionToWindow(sf::RenderWindow& window, std::vector<sf::View>& views, std::vector<std::vector<Tile>>& tiles, e_tab& tabs)
+{
+	window.setView(views[static_cast<int>(e_views::PRODUCTION)]);
+	window.draw(mapBackground);
+	for (int i = 0; i < tilesNums.x; i++) {
+		for (int j = 0; j < tilesNums.y; j++) {
+			window.draw(tiles[i][j].getTileSprite());
+			if (tiles[i][j].hasFactory()) {
+				window.draw(tiles[i][j].getFactorySprite());
+				window.draw(tiles[i][j].getBeingProduced());
+			}
+		}
+	}
+	if (tabs == e_tab::PRODUCTION_CLICKED) {
+		drawResearchLeftToWindow(window, views);
+	}
 }
 
 std::string Renderer::secondsToDateAndTime(float sec)

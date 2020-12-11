@@ -3,6 +3,7 @@
 #include<string>
 #include<utility>
 #include<SFML/Graphics.hpp>
+#include<queue>
 
 class Tile
 {
@@ -10,6 +11,7 @@ private:
 	sf::Sprite m_tileSprite;
 	sf::Sprite m_factorySprite;
 	sf::Sprite m_terrainSprite;
+	sf::Sprite m_beingProduced;
 	bool m_hasFactory;
 	int m_terrain;
 	float m_factoryOutput = 100.f;
@@ -27,4 +29,5 @@ public:
 	sf::Sprite& getTileSprite();
 	sf::Sprite& getFactorySprite();
 	sf::Sprite& getTerrainSprite();
+	sf::Sprite& getBeingProduced();
 };

@@ -32,7 +32,6 @@ void Allegiance::update(float elapsedTime, std::vector <std::vector <Tile> >& ti
 			}
 		}
 	}
-	m_constructionPoints += elapsedTime;
 }
 
 void Allegiance::setName(std::string& name)
@@ -40,9 +39,14 @@ void Allegiance::setName(std::string& name)
 	m_name = name;
 }
 
-float Allegiance::getConstructionPoints() const
+float Allegiance::getConstructionPoints()
 {
 	return m_constructionPoints;
+}
+
+void Allegiance::setConstructionPoints(float constructionPt)
+{
+	m_constructionPoints = constructionPt;
 }
 
 std::string Allegiance::getName()const

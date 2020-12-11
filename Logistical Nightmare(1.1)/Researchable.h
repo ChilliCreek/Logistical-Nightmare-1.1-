@@ -10,6 +10,7 @@ private:
 	sf::Text m_resTimeDays;
 	const float m_RESEARCH_TIME_SEC;
 	sf::Clock* m_researchClock;
+	float m_resTimeCount = 0;
 	Equipment m_equipment;
 	sf::RectangleShape m_equipmentBackground;
 	sf::RectangleShape m_progressBarFull;
@@ -20,7 +21,7 @@ public:
 	Equipment& getEquipment();
 	Researchable(std::string name, float armor, float antiArmor, float antiPersonnel, float productionCost, float reliability, sf::Vector2f position, float resTime, int prevRes);
 	void doResearch();
-	void update();
+	void update(int GAME_SPEED);
 	e_researchStatus& isResearched();
 	sf::RectangleShape getEquipmentBackground();
 	sf::RectangleShape getProgressBarFull();

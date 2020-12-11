@@ -4,6 +4,9 @@
 #include<iostream>
 Tile::Tile(int terrain, sf::Vector2i pos)
 {
+	m_beingProduced.setPosition(Renderer::TILE_SIZE * pos.x, Renderer::TILE_SIZE * pos.y + Renderer::TILE_SIZE / 2);
+	m_beingProduced.setScale(0.25f, 0.25f);
+
 	m_terrainSprite.setPosition(Renderer::TILE_SIZE * pos.x, Renderer::TILE_SIZE * pos.y + Renderer::TILE_SIZE / 2);
 	m_terrainSprite.setTexture(TextureHolder::getTexture("graphics/" + terrainNumToString(terrain) + ".png"));
 	m_terrainSprite.setScale(0.5f, 0.5f);
@@ -28,13 +31,15 @@ bool Tile::hasFactory() const
 
 void Tile::addFactory()
 {
+	m_beingProduced.setTexture(TextureHolder::getTexture("graphics/construction.png"));
 	m_hasFactory = true;
 }
 
 void Tile::setEquipmentInProduction(std::string equipmentName, float productionCost)
 {
 	m_productionCost = productionCost;
-	m_inProduction = equipmentName;
+	m_beingProduced.setTexture(TextureHolder::getTexture(equipmentName));
+	m_inProduction = equipmentName.substr(9, equipmentName.length() - 5);
 }
 
 std::pair <std::string, int> Tile::update(float time)
@@ -69,4 +74,9 @@ sf::Sprite& Tile::getFactorySprite()
 sf::Sprite& Tile::getTerrainSprite()
 {
 	return m_terrainSprite;
+}
+
+sf::Sprite & Tile::getBeingProduced()
+{
+	return m_beingProduced;
 }
