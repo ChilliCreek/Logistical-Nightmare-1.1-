@@ -8,14 +8,11 @@ const float Renderer::TIME_DILATION = 2500.f;
 float Renderer::ZOOM_SENSITIVITY = 0.05f;
 int Renderer::GAME_SPEED = 4;
 sf::Font Renderer::font;
-sf::Vector2f Renderer::resolution;
 std::string Renderer::monthStrings[12] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
-
-Renderer::Renderer()
+//resolution 
+sf::Vector2f Renderer::resolution = sf::Vector2f(sf::VideoMode::getDesktopMode().width, sf::VideoMode::getDesktopMode().height);
+Renderer::Renderer() : zoomSensitivity(sf::Vector2f(0, 0), 0.01f, 0.10f, resolution.x * 0.3f, "Zoom Sensitivity:", 0.05f), cameraSensitivity(sf::Vector2f(0, 100), 5.f, 30.f, resolution.x * 0.3f, "Camera Sensitivity:", 15.f)
 {
-	//resolution 
-	resolution.x = sf::VideoMode::getDesktopMode().width;
-	resolution.y = sf::VideoMode::getDesktopMode().height;
 	//hud background
 	hudBackground.setFillColor(sf::Color::Black);
 	hudBackground.setPosition(0, 0);
@@ -41,8 +38,7 @@ Renderer::Renderer()
 	//blue map background
 	sf::Color seaBlue(0, 105, 248);
 	mapBackground.setFillColor(seaBlue);
-	//font set
-	font.loadFromFile("font/Stanberry.ttf");
+	//HUD:
 	//Allegiance names
 	allegianceText1.setFont(font);
 	allegianceText2.setFont(font);
@@ -51,7 +47,6 @@ Renderer::Renderer()
 	allegianceText1.setPosition(10, 10);
 	allegianceText2.setPosition(resolution.x * 0.85f, 10);
 	//Tabs
-	sf::Color gold(255, 223, 0, 255);
 	tabTexts[0].setString("Map");
 	tabTexts[1].setString("Research");
 	tabTexts[2].setString("Production");
@@ -83,6 +78,12 @@ Renderer::Renderer()
 	gameSpeedButtonShade.setFillColor(sf::Color(255, 255, 255, 96));
 	gameSpeedButtonShade.setScale(0.4f, 0.4f);
 	gameSpeedButtonShade.setPosition(resolution.x * 0.4f + speedButtons.getLocalBounds().width * 0.6f * 0.4f, speedButtons.getGlobalBounds().top);
+	//Options:
+	optionsBackground.setPosition(0, 0);
+	optionsBackground.setSize(sf::Vector2f(resolution.x * 0.5f, resolution.y * 0.45f));
+	optionsBackground.setFillColor(chryslerDarkSilver);
+	optionsBackground.setOutlineThickness(2);
+	optionsBackground.setOutlineColor(sf::Color::Black);
 }
 
 void Renderer::drawToWindow(sf::RenderWindow& window, std::vector<sf::View>& views, e_tab& tabs, std::vector <std::vector <Tile> >& tiles)
@@ -106,6 +107,7 @@ void Renderer::drawToWindow(sf::RenderWindow& window, std::vector<sf::View>& vie
 	case e_tab::BUILDING:
 		break;
 	case e_tab::OPTIONS:
+		drawOptionsToWindow(window, views[static_cast<int>(e_views::OPTIONS)]);
 		break;
 	}
 }
@@ -187,9 +189,12 @@ void Renderer::drawResearchLeftToWindow(sf::RenderWindow& window, std::vector<sf
 	window.draw(researchFrameLeft);
 }
 
-void Renderer::drawOptionsToWindow(sf::RenderWindow & window, std::vector<sf::View>& views)
+void Renderer::drawOptionsToWindow(sf::RenderWindow & window, sf::View& optionsView)
 {
-
+	window.setView(optionsView);
+	window.draw(optionsBackground);
+	zoomSensitivity.drawItself(window, optionsView);
+	cameraSensitivity.drawItself(window, optionsView);
 }
 
 void Renderer::drawProductionToWindow(sf::RenderWindow& window, std::vector<sf::View>& views, std::vector<std::vector<Tile>>& tiles, e_tab& tabs)

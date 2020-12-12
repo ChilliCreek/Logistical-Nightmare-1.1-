@@ -11,6 +11,8 @@
 #include<fstream>
 #include"Researchable.h"
 #include<unordered_map>
+#include"Adjustable.h"
+#include"Writable.h"
 
 enum class e_tab { UNITS, RESEARCH, PRODUCTION, PRODUCTION_CLICKED, LOGISTICS, BUILDING, OPTIONS};
 enum class e_gameStat { RUNNING, PAUSED };
@@ -22,6 +24,9 @@ protected:
 	sf::Vector2i tilesNums;
 	sf::Vector2f mapSize;
 	sf::Vector2f selectedTile;
+	Adjustable zoomSensitivity;
+	Adjustable cameraSensitivity;
+	//Writable IPaddress;
 	std::vector<Researchable> allResearch;
 	std::unordered_map<std::string, int> stringToResIndex;
 	sf::RectangleShape hudBackground;
@@ -30,6 +35,7 @@ protected:
 	sf::RectangleShape researchBackgroundRight;
 	sf::RectangleShape mapBackground;
 	sf::RectangleShape gameSpeedButtonShade;
+	sf::RectangleShape optionsBackground;
 	sf::Text allegianceText1;
 	sf::Text allegianceText2;
 	sf::Text tabTexts[6];
@@ -54,7 +60,7 @@ public:
 	void drawResearchLeftToWindow(sf::RenderWindow& window, std::vector<sf::View>& views);
 	void drawResearchRightToWindow(sf::RenderWindow& window, std::vector<sf::View>& views);
 	// TODO
-	void drawOptionsToWindow(sf::RenderWindow& window, std::vector<sf::View>& views);
+	void drawOptionsToWindow(sf::RenderWindow& window, sf::View& optionsView);
 	void drawProductionToWindow(sf::RenderWindow& window, std::vector<sf::View>& views, std::vector <std::vector <Tile> >& tiles, e_tab& tabs);
 	static std::string secondsToDateAndTime(float sec);
 };

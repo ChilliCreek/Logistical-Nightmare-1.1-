@@ -42,6 +42,15 @@
     <ClInclude Include="Renderer.h">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="Writable.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Adjustable.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GUI_Drawable.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -72,6 +81,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Renderer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Writable.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Adjustable.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

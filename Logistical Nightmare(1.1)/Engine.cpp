@@ -304,6 +304,12 @@ void Engine::run()
 	views[3].setViewport(sf::FloatRect(0.9f, 0.1f, 0.1f, 0.9f));
 	views.push_back(sf::View(sf::Vector2f(mapSize.x / 2, mapSize.y / 2), sf::Vector2f(resolution.x, resolution.y * 0.9f)));
 	views[4].setViewport(sf::FloatRect(0, 0.1f, 1, 0.9f));
+	views.push_back(sf::View(sf::Vector2f(mapSize.x / 2, mapSize.y / 2), sf::Vector2f(resolution.x, resolution.y * 0.9f)));
+	views[5].setViewport(sf::FloatRect(0, 0.1f, 1, 0.9f));
+	views.push_back(sf::View(sf::Vector2f(mapSize.x / 2, mapSize.y / 2), sf::Vector2f(resolution.x, resolution.y * 0.9f)));
+	views[6].setViewport(sf::FloatRect(0, 0.1f, 1, 0.9f));
+	views.push_back(sf::View(sf::Vector2f(resolution.x / 4, resolution.y * 0.225f), sf::Vector2f(resolution.x / 2, resolution.y * 0.45f)));
+	views[7].setViewport(sf::FloatRect(0.25f, 0.325f, 0.5f, 0.45f));
 	//Tab status
 	e_tab tabStatus = e_tab::UNITS;
 
