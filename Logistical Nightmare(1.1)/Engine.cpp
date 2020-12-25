@@ -50,17 +50,18 @@ std::vector<std::vector<Tile>> Engine::saveLoader(std::vector<Allegiance>& alleg
 //Easier than hard coding everything in the run method
 void Engine::equipmentStatSetter()
 {
-	allResearch.push_back(Researchable("graphics/kar98k.png", 0.f, 0.f, 15.f, 5.f, 90.f, sf::Vector2f(300, 100), 10, -1));
-	allResearch.push_back(Researchable("graphics/mp40.png", 0.f, 0.f, 30.f, 10.f, 79.f, sf::Vector2f(100, 300), 200, 0));
-	allResearch.push_back(Researchable("graphics/panzerschreck.png", 0.f, 60.f, 5.f, 20.f, 85.f, sf::Vector2f(100, 500), 450, 1));
-	allResearch.push_back(Researchable("graphics/panzerfaust.png", 0.f, 80.f, 2.f, 20.f, 80.f, sf::Vector2f(100, 700), 800, 2));
-	allResearch.push_back(Researchable("graphics/anti_tank.png", 0.f, 80.f, 2.f, 20.f, 80.f, sf::Vector2f(100, 900), 830, 3));
-	allResearch.push_back(Researchable("graphics/panzer_3_b.png", 30.f, 45.f, 25.f, 190.f, 92.f, sf::Vector2f(300, 300), 279, 0));
-	allResearch.push_back(Researchable("graphics/panzer_4_g.png", 60.f, 90.f, 27.f, 240.f, 89.f, sf::Vector2f(300, 500), 689, 5));
-	allResearch.push_back(Researchable("graphics/panther.png", 100.f, 145.f, 27.f, 320.f, 74.f, sf::Vector2f(300, 700), 756, 6));
-	allResearch.push_back(Researchable("graphics/tiger_2_p.png", 130.f, 180.f, 40.f, 550.f, 60.f, sf::Vector2f(500, 500), 1520, 6));
-	allResearch.push_back(Researchable("graphics/tiger_2_h.png", 160.f, 180.f, 40.f, 600.f, 65.f, sf::Vector2f(500, 700), 390, 8));
-	allResearch.push_back(Researchable("graphics/maus.png", 0.f, 80.f, 2.f, 20.f, 80.f, sf::Vector2f(500, 900), 2345, 9));
+	allResearch.emplace_back("graphics/kar98k.png", 0.f, 0.f, 15.f, 5.f, 90.f, sf::Vector2f(300, 100), 10, -1);
+	allResearch.emplace_back("graphics/mp40.png", 0.f, 0.f, 30.f, 10.f, 79.f, sf::Vector2f(100, 300), 200, 0);
+	allResearch.emplace_back("graphics/panzerschreck.png", 0.f, 60.f, 5.f, 20.f, 85.f, sf::Vector2f(100, 500), 450, 1);
+	allResearch.emplace_back("graphics/panzerfaust.png", 0.f, 80.f, 2.f, 20.f, 80.f, sf::Vector2f(100, 700), 800, 2);
+	allResearch.emplace_back("graphics/anti_tank.png", 0.f, 80.f, 2.f, 20.f, 80.f, sf::Vector2f(100, 900), 830, 3);
+	allResearch.emplace_back("graphics/panzer_3_b.png", 30.f, 45.f, 25.f, 190.f, 92.f, sf::Vector2f(300, 300), 279, 0);
+	allResearch.emplace_back("graphics/panzer_4_g.png", 60.f, 90.f, 27.f, 240.f, 89.f, sf::Vector2f(300, 500), 689, 5);
+	allResearch.emplace_back("graphics/panther.png", 100.f, 145.f, 27.f, 320.f, 74.f, sf::Vector2f(300, 700), 756, 6);
+	allResearch.emplace_back("graphics/tiger_2_p.png", 130.f, 180.f, 40.f, 550.f, 60.f, sf::Vector2f(500, 500), 1520, 6);
+	allResearch.emplace_back("graphics/tiger_2_h.png", 160.f, 180.f, 40.f, 600.f, 65.f, sf::Vector2f(500, 700), 390, 8);
+	allResearch.emplace_back("graphics/maus.png", 0.f, 80.f, 2.f, 20.f, 80.f, sf::Vector2f(500, 900), 2345, 9);
+	allResearch.emplace_back("graphics/ConstructionPoints.png", 0.f, 80.f, 2.f, 20.f, 80.f, sf::Vector2f(700, 100), 10, -1);
 }
 
 //the general input method that runs every frame
@@ -69,8 +70,8 @@ void Engine::input(sf::RenderWindow& window, std::vector<sf::View>& views, sf::V
 	//To make the code more readable
 	sf::View& mapView = views[static_cast<int>(e_views::MAP)];
 	sf::View& hudView = views[static_cast<int>(e_views::HUD)];
-	sf::View& resViewLeft = views[static_cast<int>(e_views::RESEARCH_LEFT)];
 	sf::View& resViewRight = views[static_cast<int>(e_views::RESEARCH_RIGHT)];
+	sf::Vector2i screenPosition = sf::Mouse::getPosition(window);
 	while (window.pollEvent(event)) {
 		switch (event.type) 
 		{   
@@ -83,7 +84,6 @@ void Engine::input(sf::RenderWindow& window, std::vector<sf::View>& views, sf::V
 				}
 				break;
 			case sf::Event::MouseButtonPressed:
-				{sf::Vector2i screenPosition = sf::Mouse::getPosition(window);
 				if (event.mouseButton.button == sf::Mouse::Left) {
 					if (screenPosition.y <= (resolution.y * 0.1f)) {
 						hudInput(window.mapPixelToCoords(screenPosition, hudView), tabStatus);
@@ -97,57 +97,56 @@ void Engine::input(sf::RenderWindow& window, std::vector<sf::View>& views, sf::V
 					else if (tabStatus == e_tab::PRODUCTION || tabStatus == e_tab::PRODUCTION_CLICKED) {
 						productionInput(window, views, screenPosition, tabStatus, tiles);
 					}
-				}
+					else if (tabStatus == e_tab::OPTIONS) {
+						optionsInput(window.mapPixelToCoords(screenPosition, views[static_cast<int>(e_views::OPTIONS)]));
+					}
 				else if (event.mouseButton.button == sf::Mouse::Right) {
 					if (tabStatus == e_tab::UNITS) {
-
 					}
 				}
 				break; }
-			case sf::Event::KeyPressed:
-				if (event.key.code == sf::Keyboard::Num1) {
-					GAME_SPEED = 0;
-					gameSpeedButtonShade.setPosition(resolution.x * 0.4f, speedButtons.getGlobalBounds().top);
+			case sf::Event::MouseButtonReleased:
+				if (tabStatus == e_tab::OPTIONS && event.mouseButton.button == sf::Mouse::Left) {
+					if (zoomSensitivity.isClicked()) {
+						zoomSensitivity.setClickedOrNot(false, window.mapPixelToCoords(screenPosition, views[static_cast<int>(e_views::OPTIONS)]));
+					}
+					if (cameraSensitivity.isClicked()) {
+						cameraSensitivity.setClickedOrNot(false, window.mapPixelToCoords(screenPosition, views[static_cast<int>(e_views::OPTIONS)]));
+					}
 				}
-				else if (event.key.code == sf::Keyboard::Num2) {
-					GAME_SPEED = 1;
-					gameSpeedButtonShade.setPosition(resolution.x * 0.4f + speedButtons.getLocalBounds().width * 0.2f * 0.4f, speedButtons.getGlobalBounds().top);
-				}
-				else if (event.key.code == sf::Keyboard::Num3) {
-					GAME_SPEED = 4;
-					gameSpeedButtonShade.setPosition(resolution.x * 0.4f + speedButtons.getLocalBounds().width * 0.4f * 0.4f, speedButtons.getGlobalBounds().top);
-				}
-				else if (event.key.code == sf::Keyboard::Num4) {
-					GAME_SPEED = 8;
-					gameSpeedButtonShade.setPosition(resolution.x * 0.4f + speedButtons.getLocalBounds().width * 0.6f * 0.4f, speedButtons.getGlobalBounds().top);
-				}
-				else if (event.key.code == sf::Keyboard::Num5) {
-					GAME_SPEED = 16;
-					gameSpeedButtonShade.setPosition(resolution.x * 0.4f + speedButtons.getLocalBounds().width * 0.8f * 0.4f, speedButtons.getGlobalBounds().top);
+				break;
+			case sf::Event::TextEntered:
+				if (tabStatus == e_tab::OPTIONS) {
+					if (test.isClicked()) {
+						test.addNumber(event.text.unicode);
+					}
 				}
 				break;
 		}
 	}
+
 	if (tabStatus == e_tab::UNITS) {
-		cameraMover(mapView);
+		cameraMover(mapView, sf::Vector2f(mapSize.x, mapSize.y), sf::Vector2f(0, 0));
 	}
-	else if (tabStatus == e_tab::PRODUCTION || tabStatus == e_tab::PRODUCTION_CLICKED) {
-		cameraMover(views[static_cast<int>(e_views::PRODUCTION)]);
+	else if (tabStatus == e_tab::PRODUCTION) {
+		cameraMover(views[static_cast<int>(e_views::PRODUCTION)], sf::Vector2f(mapSize.x, mapSize.y), sf::Vector2f(0, 0));
+	}
+	else if (tabStatus == e_tab::PRODUCTION_CLICKED) {
+		cameraMover(views[static_cast<int>(e_views::RESEARCH_LEFT)], sf::Vector2f(researchBackgroundLeft.getSize().x - resolution.x * 0.2f, researchBackgroundLeft.getSize().y - resolution.y * 0.45f), sf::Vector2f(resolution.x * 0.2f, resolution.y * 0.45f));
+		researchFrameLeft.setPosition(views[static_cast<int>(e_views::RESEARCH_LEFT)].getCenter());
 	}
 	else if (tabStatus == e_tab::RESEARCH) {
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::W) && resViewLeft.getCenter().y > (CAMERA_SENSITIVITY + resolution.y * 0.45f)) {
-			resViewLeft.setCenter(sf::Vector2f(resViewLeft.getCenter().x, resViewLeft.getCenter().y - CAMERA_SENSITIVITY));
-		}
-		else if (sf::Keyboard::isKeyPressed(sf::Keyboard::S) && resViewLeft.getCenter().y < (researchBackgroundLeft.getSize().y - CAMERA_SENSITIVITY - resolution.y * 0.45f)) {
-			resViewLeft.setCenter(sf::Vector2f(resViewLeft.getCenter().x, resViewLeft.getCenter().y + CAMERA_SENSITIVITY));
-		}
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::A) && resViewLeft.getCenter().x > (CAMERA_SENSITIVITY + resolution.x * 0.2f)) {
-			resViewLeft.setCenter(sf::Vector2f(resViewLeft.getCenter().x - CAMERA_SENSITIVITY, resViewLeft.getCenter().y));
-		}
-		else if (sf::Keyboard::isKeyPressed(sf::Keyboard::D) && resViewLeft.getCenter().x < (researchBackgroundLeft.getSize().x - CAMERA_SENSITIVITY - resolution.x * 0.2f)) {
-			resViewLeft.setCenter(sf::Vector2f(resViewLeft.getCenter().x + CAMERA_SENSITIVITY, resViewLeft.getCenter().y));
-		}
-		researchFrameLeft.setPosition(resViewLeft.getCenter());
+		cameraMover(views[static_cast<int>(e_views::RESEARCH_LEFT)], sf::Vector2f(researchBackgroundLeft.getSize().x - resolution.x * 0.2f, researchBackgroundLeft.getSize().y - resolution.y * 0.45f), sf::Vector2f(resolution.x * 0.2f, resolution.y * 0.45f));
+		researchFrameLeft.setPosition(views[static_cast<int>(e_views::RESEARCH_LEFT)].getCenter());
+	}
+
+	if (zoomSensitivity.isClicked()) {
+		zoomSensitivity.setMovablePosition(window.mapPixelToCoords(screenPosition, views[static_cast<int>(e_views::OPTIONS)]));
+		ZOOM_SENSITIVITY = zoomSensitivity.getVal();
+	}
+	if (cameraSensitivity.isClicked()) {
+		cameraSensitivity.setMovablePosition(window.mapPixelToCoords(screenPosition, views[static_cast<int>(e_views::OPTIONS)]));
+		CAMERA_SENSITIVITY = cameraSensitivity.getVal();
 	}
 }
 
@@ -206,6 +205,19 @@ void Engine::productionInput(sf::RenderWindow & window, std::vector<sf::View>& v
 	}
 }
 
+void Engine::optionsInput(sf::Vector2f mouseGlobalPos)
+{
+	if (zoomSensitivity.movableContains(mouseGlobalPos) && zoomSensitivity.isClicked() == false) {
+		zoomSensitivity.setClickedOrNot(true, mouseGlobalPos);
+	}
+	if (cameraSensitivity.movableContains(mouseGlobalPos) && zoomSensitivity.isClicked() == false) {
+		cameraSensitivity.setClickedOrNot(true, mouseGlobalPos);
+	}
+	if (!test.setClickedTrue(mouseGlobalPos)) {
+		test.setClickedFalse();
+	}
+}
+
 void Engine::zoom(sf::View& mapView, float scrollDelta, float& zoomFactor)
 {
 	if (zoomFactor < MAX_ZOOM && scrollDelta > 0) {
@@ -220,18 +232,18 @@ void Engine::zoom(sf::View& mapView, float scrollDelta, float& zoomFactor)
 	}
 }
 
-void Engine::cameraMover(sf::View & view)
+void Engine::cameraMover(sf::View& view, sf::Vector2f boundsMax, sf::Vector2f boundsMin)
 {
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::W) && view.getCenter().y > CAMERA_SENSITIVITY) {
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::W) && view.getCenter().y > (CAMERA_SENSITIVITY + boundsMin.y)) {
 		view.setCenter(sf::Vector2f(view.getCenter().x, view.getCenter().y - CAMERA_SENSITIVITY));
 	}
-	else if (sf::Keyboard::isKeyPressed(sf::Keyboard::S) && view.getCenter().y < (mapSize.y - CAMERA_SENSITIVITY)) {
+	else if (sf::Keyboard::isKeyPressed(sf::Keyboard::S) && view.getCenter().y < (boundsMax.y - CAMERA_SENSITIVITY)) {
 		view.setCenter(sf::Vector2f(view.getCenter().x, view.getCenter().y + CAMERA_SENSITIVITY));
 	}
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::A) && view.getCenter().x > CAMERA_SENSITIVITY) {
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::A) && view.getCenter().x > (CAMERA_SENSITIVITY + boundsMin.x)) {
 		view.setCenter(sf::Vector2f(view.getCenter().x - CAMERA_SENSITIVITY, view.getCenter().y));
 	}
-	else if (sf::Keyboard::isKeyPressed(sf::Keyboard::D) && view.getCenter().x < (mapSize.x - CAMERA_SENSITIVITY)) {
+	else if (sf::Keyboard::isKeyPressed(sf::Keyboard::D) && view.getCenter().x < (boundsMax.x - CAMERA_SENSITIVITY)) {
 		view.setCenter(sf::Vector2f(view.getCenter().x + CAMERA_SENSITIVITY, view.getCenter().y));
 	}
 }
@@ -260,6 +272,30 @@ void Engine::hudInput(sf::Vector2f mouseHudPos, e_tab& tab)
 				break;
 			default:
 				tab = e_tab::OPTIONS;
+				break;
+		}
+	}
+	if (speedButtons.getGlobalBounds().contains(mouseHudPos)) {
+		switch (static_cast<int>((mouseHudPos.x - speedButtons.getGlobalBounds().left) / (speedButtons.getGlobalBounds().width / 5))) {
+		    case 0:
+				GAME_SPEED = 0;
+				gameSpeedButtonShade.setPosition(resolution.x * 0.4f, speedButtons.getGlobalBounds().top);
+				break;
+			case 1:
+				GAME_SPEED = 1;
+				gameSpeedButtonShade.setPosition(resolution.x * 0.4f + speedButtons.getLocalBounds().width * 0.2f * 0.4f, speedButtons.getGlobalBounds().top);
+				break;
+			case 2:
+				GAME_SPEED = 4;
+				gameSpeedButtonShade.setPosition(resolution.x * 0.4f + speedButtons.getLocalBounds().width * 0.4f * 0.4f, speedButtons.getGlobalBounds().top);
+				break;
+			case 3:
+				GAME_SPEED = 8;
+				gameSpeedButtonShade.setPosition(resolution.x * 0.4f + speedButtons.getLocalBounds().width * 0.6f * 0.4f, speedButtons.getGlobalBounds().top);
+				break;
+			case 4:
+				GAME_SPEED = 16;
+				gameSpeedButtonShade.setPosition(resolution.x * 0.4f + speedButtons.getLocalBounds().width * 0.8f * 0.4f, speedButtons.getGlobalBounds().top);
 				break;
 		}
 	}

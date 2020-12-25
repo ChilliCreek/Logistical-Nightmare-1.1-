@@ -18,7 +18,7 @@ public:
 	void addTile(sf::Vector2i tileLocation);
 	bool ifLost()const;
 	void update(float elapsedTime, std::vector <std::vector <Tile> >& tiles);
-	void setName(std::string&);
+	void setName(const std::string&);
 	float getConstructionPoints();
 	void setConstructionPoints(float constructionPt);
 	std::string getName()const;

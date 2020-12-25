@@ -18,6 +18,6 @@ public:
 	float getReliability()const;
 	float getProductionCost()const;
 	sf::Sprite getEquipmentSprite();
-	Equipment(std::string name, float armor, float antiArmor, float antiPersonnel, float productionCost, float reliability);
+	Equipment(const std::string& name, float armor, float antiArmor, float antiPersonnel, float productionCost, float reliability);
 	void setSpritePosition(sf::Vector2f position);
 };

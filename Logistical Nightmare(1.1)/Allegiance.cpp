@@ -34,7 +34,7 @@ void Allegiance::update(float elapsedTime, std::vector <std::vector <Tile> >& ti
 	}
 }
 
-void Allegiance::setName(std::string& name)
+void Allegiance::setName(const std::string& name)
 {
 	m_name = name;
 }

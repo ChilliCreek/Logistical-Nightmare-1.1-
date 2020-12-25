@@ -7,12 +7,14 @@
 const float Renderer::TIME_DILATION = 2500.f;
 float Renderer::ZOOM_SENSITIVITY = 0.05f;
 int Renderer::GAME_SPEED = 4;
+int Renderer::playerNum = 0;
 sf::Font Renderer::font;
 std::string Renderer::monthStrings[12] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
 //resolution 
 sf::Vector2f Renderer::resolution = sf::Vector2f(sf::VideoMode::getDesktopMode().width, sf::VideoMode::getDesktopMode().height);
-Renderer::Renderer() : zoomSensitivity(sf::Vector2f(0, 0), 0.01f, 0.10f, resolution.x * 0.3f, "Zoom Sensitivity:", 0.05f), cameraSensitivity(sf::Vector2f(0, 100), 5.f, 30.f, resolution.x * 0.3f, "Camera Sensitivity:", 15.f)
+Renderer::Renderer() : zoomSensitivity(sf::Vector2f(0, 0), 0.01f, 0.10f, resolution.x * 0.3f, "Zoom Sensitivity:", 0.05f), cameraSensitivity(sf::Vector2f(0, 100), 5.f, 30.f, resolution.x * 0.3f, "Camera Sensitivity:", 15.f), test(sf::Vector2f(50, 200))
 {
+	allResearch.reserve(11);
 	//hud background
 	hudBackground.setFillColor(sf::Color::Black);
 	hudBackground.setPosition(0, 0);
@@ -54,7 +56,7 @@ Renderer::Renderer() : zoomSensitivity(sf::Vector2f(0, 0), 0.01f, 0.10f, resolut
 	tabTexts[4].setString("Building");
 	tabTexts[5].setString("Options");
 	for (int i = 0; i < 6; i++) {
-		tabTexts[i].setFillColor(sf::Color::Blue);
+		tabTexts[i].setFillColor(sf::Color::Black);
 		tabTexts[i].setCharacterSize(20);
 		tabTexts[i].setPosition((resolution.x / 6.f) * i + resolution.x / 12.f, resolution.y * 0.075f);
 		tabTexts[i].setFont(font);
@@ -136,9 +138,7 @@ void Renderer::drawMapToWindow(sf::RenderWindow& window, sf::View& mapView, std:
 	window.draw(mapBackground);
 	for (int i = 0; i < tilesNums.x; i++) {
 		for (int j = 0; j < tilesNums.y; j++) {
-			window.draw(tiles[i][j].getTileSprite());
-			if (tiles[i][j].hasFactory())window.draw(tiles[i][j].getFactorySprite());
-			window.draw(tiles[i][j].getTerrainSprite());
+			tiles[i][j].drawItselfOnMap(window, mapView);
 		}
 	}
 }
@@ -175,7 +175,7 @@ void Renderer::drawResearchLeftToWindow(sf::RenderWindow& window, std::vector<sf
 	arrow.setFillColor(sf::Color::Black);
 	for (auto& res : allResearch) {
 		if (res.prevResearchVectorLocation != -1) {
-			arrow.setSize(sf::Vector2f(std::sqrt(std::powf(allResearch[res.prevResearchVectorLocation].getEquipmentBackground().getGlobalBounds().top - res.getEquipmentBackground().getGlobalBounds().top, 2) + std::powf(allResearch[res.prevResearchVectorLocation].getEquipmentBackground().getGlobalBounds().left - res.getEquipmentBackground().getGlobalBounds().left, 2)), 5.f));
+			arrow.setSize(sf::Vector2f(distanceBetween2DPoints(allResearch[res.prevResearchVectorLocation].getEquipmentBackground().getGlobalBounds().left, allResearch[res.prevResearchVectorLocation].getEquipmentBackground().getGlobalBounds().top, res.getEquipmentBackground().getGlobalBounds().left, res.getEquipmentBackground().getGlobalBounds().top), 5.f));
 			arrow.setPosition(res.getEquipmentBackground().getGlobalBounds().left + res.getEquipmentBackground().getGlobalBounds().width / 2, res.getEquipmentBackground().getGlobalBounds().top + res.getEquipmentBackground().getGlobalBounds().height / 2);
 			arrow.setRotation(90 - std::atan2f(allResearch[res.prevResearchVectorLocation].getEquipmentBackground().getGlobalBounds().left - res.getEquipmentBackground().getGlobalBounds().left, allResearch[res.prevResearchVectorLocation].getEquipmentBackground().getGlobalBounds().top - res.getEquipmentBackground().getGlobalBounds().top) * 180 / PI);
 			window.draw(arrow);
@@ -195,6 +195,7 @@ void Renderer::drawOptionsToWindow(sf::RenderWindow & window, sf::View& optionsV
 	window.draw(optionsBackground);
 	zoomSensitivity.drawItself(window, optionsView);
 	cameraSensitivity.drawItself(window, optionsView);
+	test.drawItself(window, optionsView);
 }
 
 void Renderer::drawProductionToWindow(sf::RenderWindow& window, std::vector<sf::View>& views, std::vector<std::vector<Tile>>& tiles, e_tab& tabs)
@@ -203,11 +204,7 @@ void Renderer::drawProductionToWindow(sf::RenderWindow& window, std::vector<sf::
 	window.draw(mapBackground);
 	for (int i = 0; i < tilesNums.x; i++) {
 		for (int j = 0; j < tilesNums.y; j++) {
-			window.draw(tiles[i][j].getTileSprite());
-			if (tiles[i][j].hasFactory()) {
-				window.draw(tiles[i][j].getFactorySprite());
-				window.draw(tiles[i][j].getBeingProduced());
-			}
+			tiles[i][j].drawItselfOnProduction(window, views[static_cast<int>(e_views::PRODUCTION)]);
 		}
 	}
 	if (tabs == e_tab::PRODUCTION_CLICKED) {
@@ -306,4 +303,9 @@ std::string Renderer::secondsToDateAndTime(float sec)
 	int hours = (days - float(int(days))) / (1.f / 24.f);
 	ss << monthStrings[month - 1] << " " << int(days) + 1 << " " << (year + 1940) << "  " << hours << ":00";
 	return ss.str();
+}
+
+float Renderer::distanceBetween2DPoints(float x1, float y1, float x2, float y2)
+{
+	return std::sqrt(std::powf(x1 - x2, 2) + std::powf(y1 - y2, 2));
 }

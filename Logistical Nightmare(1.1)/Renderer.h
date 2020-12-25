@@ -26,7 +26,8 @@ protected:
 	sf::Vector2f selectedTile;
 	Adjustable zoomSensitivity;
 	Adjustable cameraSensitivity;
-	//Writable IPaddress;
+	//DELETE LATER AFTER WRITABLE COMPLETION
+	Writable test;
 	std::vector<Researchable> allResearch;
 	std::unordered_map<std::string, int> stringToResIndex;
 	sf::RectangleShape hudBackground;
@@ -45,6 +46,7 @@ protected:
 	sf::Sprite tabButtons[6];
 	float runTime = 0;
 public:
+	static int playerNum;
 	static sf::Font font;
 	static sf::Vector2f resolution;
 	static float ZOOM_SENSITIVITY;
@@ -63,4 +65,5 @@ public:
 	void drawOptionsToWindow(sf::RenderWindow& window, sf::View& optionsView);
 	void drawProductionToWindow(sf::RenderWindow& window, std::vector<sf::View>& views, std::vector <std::vector <Tile> >& tiles, e_tab& tabs);
 	static std::string secondsToDateAndTime(float sec);
+	static float distanceBetween2DPoints(float x1, float y1, float x2, float y2);
 };

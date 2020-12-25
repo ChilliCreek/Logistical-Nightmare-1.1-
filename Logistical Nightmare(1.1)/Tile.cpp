@@ -7,17 +7,19 @@ Tile::Tile(int terrain, sf::Vector2i pos)
 	m_beingProduced.setPosition(Renderer::TILE_SIZE * pos.x, Renderer::TILE_SIZE * pos.y + Renderer::TILE_SIZE / 2);
 	m_beingProduced.setScale(0.25f, 0.25f);
 
-	m_terrainSprite.setPosition(Renderer::TILE_SIZE * pos.x, Renderer::TILE_SIZE * pos.y + Renderer::TILE_SIZE / 2);
+	m_terrainSprite.setPosition(Renderer::TILE_SIZE * pos.x + 2, Renderer::TILE_SIZE * pos.y + Renderer::TILE_SIZE / 2);
 	m_terrainSprite.setTexture(TextureHolder::getTexture("graphics/" + terrainNumToString(terrain) + ".png"));
-	m_terrainSprite.setScale(0.5f, 0.5f);
+	m_terrainSprite.setScale(0.49f, 0.49f);
 
 	m_factorySprite.setPosition(Renderer::TILE_SIZE * pos.x, Renderer::TILE_SIZE * pos.y);
 	m_factorySprite.setTexture(TextureHolder::getTexture("graphics/factory.png"));
 	m_factorySprite.setScale(0.5f, 0.5f);
 
-	m_tileSprite.setPosition(Renderer::TILE_SIZE * pos.x, Renderer::TILE_SIZE * pos.y);
-	m_tileSprite.setTexture(TextureHolder::getTexture("graphics/map_background.png"));
-	m_tileSprite.setScale(0.5f, 0.5f);
+	m_tileRec.setPosition(Renderer::TILE_SIZE * pos.x, Renderer::TILE_SIZE * pos.y);
+	m_tileRec.setSize(sf::Vector2f(200, 200));
+	m_tileRec.setTexture(&TextureHolder::getTexture("graphics/map_background.png"));
+	m_tileRec.setOutlineColor(sf::Color::Black);
+	m_tileRec.setOutlineThickness(2);
 
 	m_terrain = terrain;
 	m_hasFactory = false;
@@ -31,15 +33,15 @@ bool Tile::hasFactory() const
 
 void Tile::addFactory()
 {
-	m_beingProduced.setTexture(TextureHolder::getTexture("graphics/construction.png"));
+	m_beingProduced.setTexture(TextureHolder::getTexture("graphics/ConstructionPoints.png"));
 	m_hasFactory = true;
 }
 
-void Tile::setEquipmentInProduction(std::string equipmentName, float productionCost)
+void Tile::setEquipmentInProduction(const std::string& equipmentName, float productionCost)
 {
 	m_productionCost = productionCost;
 	m_beingProduced.setTexture(TextureHolder::getTexture(equipmentName));
-	m_inProduction = equipmentName.substr(9, equipmentName.length() - 5);
+	m_inProduction = equipmentName.substr(9, equipmentName.length() - 13);
 }
 
 std::pair <std::string, int> Tile::update(float time)
@@ -61,20 +63,26 @@ std::string Tile::terrainNumToString(int terrain)
 	}
 }
 
-sf::Sprite& Tile::getTileSprite()
+void Tile::drawItselfOnMap(sf::RenderWindow& window, sf::View& view)
 {
-	return m_tileSprite;
+	window.setView(view);
+	window.draw(m_tileRec);
+	if (hasFactory()) {
+		window.draw(m_factorySprite);
+	}
+	window.draw(m_terrainSprite);
 }
 
-sf::Sprite& Tile::getFactorySprite()
+void Tile::drawItselfOnProduction(sf::RenderWindow & window, sf::View & view)
 {
-	return m_factorySprite;
+	window.setView(view);
+	window.draw(m_tileRec);
+	if (hasFactory()) {
+		window.draw(m_factorySprite);
+		window.draw(m_beingProduced);
+	}
 }
 
-sf::Sprite& Tile::getTerrainSprite()
-{
-	return m_terrainSprite;
-}
 
 sf::Sprite & Tile::getBeingProduced()
 {

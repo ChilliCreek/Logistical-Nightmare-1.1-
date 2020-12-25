@@ -8,7 +8,7 @@
 class Tile
 {
 private:
-	sf::Sprite m_tileSprite;
+	sf::RectangleShape m_tileRec;
 	sf::Sprite m_factorySprite;
 	sf::Sprite m_terrainSprite;
 	sf::Sprite m_beingProduced;
@@ -23,11 +23,10 @@ public:
 	Tile(int terrain, sf::Vector2i pos);
 	bool hasFactory()const;
 	void addFactory();
-	void setEquipmentInProduction(std::string equipmentName, float productionCost);
+	void setEquipmentInProduction(const std::string& equipmentName, float productionCost);
 	std::pair <std::string, int> update(float);
 	static std::string terrainNumToString(int terrain);
-	sf::Sprite& getTileSprite();
-	sf::Sprite& getFactorySprite();
-	sf::Sprite& getTerrainSprite();
+	void drawItselfOnMap(sf::RenderWindow& window, sf::View& view);
+	void drawItselfOnProduction(sf::RenderWindow& window, sf::View& view);
 	sf::Sprite& getBeingProduced();
 };

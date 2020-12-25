@@ -29,7 +29,7 @@ sf::Sprite Equipment::getEquipmentSprite()
 	return m_equipmentSprite;
 }
 
-Equipment::Equipment(std::string name, float armor, float antiArmor, float antiPersonnel, float productionCost, float reliability)
+Equipment::Equipment(const std::string& name, float armor, float antiArmor, float antiPersonnel, float productionCost, float reliability)
 {
 	m_name = name;
 	m_armor = armor;
