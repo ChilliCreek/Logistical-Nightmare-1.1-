@@ -6,7 +6,7 @@ float Engine::MIN_ZOOM;
 float Engine::CAMERA_SENSITIVITY = 15.f;
 float Engine::ZOOM_FACTOR_MAP = 1.f;
 float Engine::ZOOM_FACTOR_PRODUCTION = 1.f;
-std::vector<std::vector<Tile>> Engine::saveLoader(std::vector<Allegiance>& allegiances)
+Tile*** Engine::saveLoader(std::vector<Allegiance>& allegiances)
 {
 	std::ifstream saveFile;
 	saveFile.open("saves/default save.txt");
@@ -18,30 +18,25 @@ std::vector<std::vector<Tile>> Engine::saveLoader(std::vector<Allegiance>& alleg
 
 	allegianceText1.setString(nameLeft);
 	allegianceText2.setString(nameRight);
-
-	std::vector <std::vector <Tile> > tiles;
 	
-	int tileX, tileY;
-	saveFile >> tileX >> tileY;
+	saveFile >> tilesNums.x >> tilesNums.y;
 
-	std::vector<Tile> tempvec;
-	for (int i = 0; i < tileX; i++) {
-		tiles.push_back(tempvec);
-	}
+	Tile*** tiles = new Tile**[tilesNums.y];
 
-	int terrainNum, allegianceNum;
-	for (int i = 0; i < tileX; i++) {
-		for (int j = 0; j < tileY; j++) {
+	for (int i = 0; i < tilesNums.y; i++) {
+		tiles[i] = (Tile**)malloc(sizeof(Tile*) * tilesNums.x);
+		int terrainNum, allegianceNum;
+		for (int j = 0; j < tilesNums.x; j++) {
 			saveFile >> terrainNum >> allegianceNum;
-			Tile tempTile(terrainNum, sf::Vector2i(i, j));
-			tiles[i].push_back(tempTile);
+			tiles[i][j] = new Tile(terrainNum, sf::Vector2i(i, j));
 			allegiances[allegianceNum].addTile(sf::Vector2i(i, j));
 		}
 	}
+
 	int factoryCooX, factoryCooY;
 	while (saveFile.peek() != EOF) {
 		saveFile >> factoryCooX >> factoryCooY;
-		tiles[factoryCooX][factoryCooY].addFactory();
+		tiles[factoryCooX][factoryCooY]->addFactory();
 	}
 	saveFile.close();
 	return tiles;
@@ -65,7 +60,7 @@ void Engine::equipmentStatSetter()
 }
 
 //the general input method that runs every frame
-void Engine::input(sf::RenderWindow& window, std::vector<sf::View>& views, sf::Vector2f resolution, e_tab& tabStatus, sf::Event& event, std::vector <std::vector <Tile> >& tiles)
+void Engine::input(sf::RenderWindow& window, std::vector<sf::View>& views, sf::Vector2f resolution, e_tab& tabStatus, sf::Event& event, Tile*** tiles)
 {
 	//To make the code more readable
 	sf::View& mapView = views[static_cast<int>(e_views::MAP)];
@@ -162,18 +157,18 @@ void Engine::researchInput(sf::RenderWindow& window, std::vector<sf::View>& view
 	}
 }
 
-void Engine::productionInput(sf::RenderWindow & window, std::vector<sf::View>& views, sf::Vector2i mouseLocalPosition, e_tab& tabStatus, std::vector <std::vector <Tile> >& tiles)
+void Engine::productionInput(sf::RenderWindow & window, std::vector<sf::View>& views, sf::Vector2i mouseLocalPosition, e_tab& tabStatus, Tile*** tiles)
 {
 	if (tabStatus == e_tab::PRODUCTION) {
 		sf::Vector2f mouseProductionPosition = window.mapPixelToCoords(mouseLocalPosition, views[static_cast<int>(e_views::PRODUCTION)]);
 		if (mouseProductionPosition.x >= 0 && mouseProductionPosition.x < mapSize.x && mouseProductionPosition.y >= 0 && mouseProductionPosition.y < mapSize.y) {
 			productionSelectedTile = sf::Vector2i(static_cast<int>(mouseProductionPosition.x / TILE_SIZE), static_cast<int>(mouseProductionPosition.y / TILE_SIZE));
-			if (tiles[productionSelectedTile.x][productionSelectedTile.y].hasFactory()) {
+			if (tiles[productionSelectedTile.x][productionSelectedTile.y]->hasFactory()) {
 				tabStatus = e_tab::PRODUCTION_CLICKED;
 				views[static_cast<int>(e_views::PRODUCTION)].setCenter(TILE_SIZE * (productionSelectedTile.x + 0.5f), TILE_SIZE * (productionSelectedTile.y + 0.5f));
 			}
 			else if (allegiances[0].getConstructionPoints() > 2500.f) {
-				tiles[productionSelectedTile.x][productionSelectedTile.y].addFactory();
+				tiles[productionSelectedTile.x][productionSelectedTile.y]->addFactory();
 				allegiances[0].setConstructionPoints(allegiances[0].getConstructionPoints() - 2500.f);
 			}
 		}
@@ -186,7 +181,7 @@ void Engine::productionInput(sf::RenderWindow & window, std::vector<sf::View>& v
 			for (auto& res : allResearch) {
 				bounds = res.getEquipmentBackground().getGlobalBounds();
 				if (bounds.contains(mouseResPosition) && res.isResearched() == e_researchStatus::RESEARCHED) {
-					tiles[productionSelectedTile.x][productionSelectedTile.y].setEquipmentInProduction(res.getEquipment().getName(),  res.getEquipment().getProductionCost());
+					tiles[productionSelectedTile.x][productionSelectedTile.y]->setEquipmentInProduction(res.getEquipment().getName(),  res.getEquipment().getProductionCost());
 					tabStatus = e_tab::PRODUCTION;
 					break;
 				}
@@ -196,7 +191,7 @@ void Engine::productionInput(sf::RenderWindow & window, std::vector<sf::View>& v
 			sf::Vector2f mouseProductionPosition = window.mapPixelToCoords(mouseLocalPosition, views[static_cast<int>(e_views::PRODUCTION)]);
 			if (mouseProductionPosition.x >= 0 && mouseProductionPosition.x < mapSize.x && mouseProductionPosition.y >= 0 && mouseProductionPosition.y < mapSize.y) {
 				productionSelectedTile = sf::Vector2i(static_cast<int>(mouseProductionPosition.x / TILE_SIZE), static_cast<int>(mouseProductionPosition.y / TILE_SIZE));
-				if (tiles[productionSelectedTile.x][productionSelectedTile.y].hasFactory()) {
+				if (tiles[productionSelectedTile.x][productionSelectedTile.y]->hasFactory()) {
 					tabStatus = e_tab::PRODUCTION_CLICKED;
 					views[static_cast<int>(e_views::PRODUCTION)].setCenter(TILE_SIZE * (productionSelectedTile.x + 0.5f), TILE_SIZE * (productionSelectedTile.y + 0.5f));
 				}
@@ -306,9 +301,8 @@ void Engine::run()
 	//start
 	allegiances.push_back(Allegiance());
 	allegiances.push_back(Allegiance());
-    std::vector <std::vector <Tile> > tiles = saveLoader(allegiances);
+    Tile*** tiles = saveLoader(allegiances);
 
-	tilesNums = sf::Vector2i(tiles.size(), tiles[0].size());
 	mapSize = sf::Vector2f(tilesNums.x * TILE_SIZE, tilesNums.y * TILE_SIZE);
 	e_gameStat gameStatus = e_gameStat::RUNNING;
 	//Max zoom and min zoom and setting the blue map background ( Did this way to prevent size distortion because of the different ratios between the map size and screen size)
@@ -383,4 +377,8 @@ void Engine::run()
 			window.clear();
 		}
 	}
+	for (int i = 0; i < tilesNums.y; i++) {
+		delete[] tiles[i];
+	}
+	delete[] tiles;
 }

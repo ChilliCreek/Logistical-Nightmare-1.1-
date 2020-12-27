@@ -56,14 +56,14 @@ public:
 	static const int TILE_SIZE = 200;
 	Renderer();
 	//The draw methods for the engine
-	void drawToWindow(sf::RenderWindow& window, std::vector<sf::View>& views, e_tab& tabs, std::vector <std::vector <Tile> >& tiles);
+	void drawToWindow(sf::RenderWindow& window, std::vector<sf::View>& views, e_tab& tabs, Tile*** tiles);
 	void drawHudToWindow(sf::RenderWindow& window, sf::View& hudView);
-	void drawMapToWindow(sf::RenderWindow& window, sf::View& mapView, std::vector <std::vector <Tile> >& tiles);
+	void drawMapToWindow(sf::RenderWindow& window, sf::View& mapView, Tile*** tiles);
 	void drawResearchLeftToWindow(sf::RenderWindow& window, std::vector<sf::View>& views);
 	void drawResearchRightToWindow(sf::RenderWindow& window, std::vector<sf::View>& views);
 	// TODO
 	void drawOptionsToWindow(sf::RenderWindow& window, sf::View& optionsView);
-	void drawProductionToWindow(sf::RenderWindow& window, std::vector<sf::View>& views, std::vector <std::vector <Tile> >& tiles, e_tab& tabs);
+	void drawProductionToWindow(sf::RenderWindow& window, std::vector<sf::View>& views, Tile*** tiles, e_tab& tabs);
 	static std::string secondsToDateAndTime(float sec);
 	static float distanceBetween2DPoints(float x1, float y1, float x2, float y2);
 };

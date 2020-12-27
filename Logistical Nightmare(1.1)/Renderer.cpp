@@ -88,7 +88,7 @@ Renderer::Renderer() : zoomSensitivity(sf::Vector2f(0, 0), 0.01f, 0.10f, resolut
 	optionsBackground.setOutlineColor(sf::Color::Black);
 }
 
-void Renderer::drawToWindow(sf::RenderWindow& window, std::vector<sf::View>& views, e_tab& tabs, std::vector <std::vector <Tile> >& tiles)
+void Renderer::drawToWindow(sf::RenderWindow& window, std::vector<sf::View>& views, e_tab& tabs, Tile*** tiles)
 {
 	drawHudToWindow(window, views[static_cast<int>(e_views::HUD)]);
 	switch (tabs) {
@@ -132,13 +132,13 @@ void Renderer::drawHudToWindow(sf::RenderWindow& window, sf::View& hudView)
 	window.draw(timeAndDate);
 }
 
-void Renderer::drawMapToWindow(sf::RenderWindow& window, sf::View& mapView, std::vector <std::vector <Tile> >& tiles)
+void Renderer::drawMapToWindow(sf::RenderWindow& window, sf::View& mapView, Tile*** tiles)
 {
 	window.setView(mapView);
 	window.draw(mapBackground);
 	for (int i = 0; i < tilesNums.x; i++) {
 		for (int j = 0; j < tilesNums.y; j++) {
-			tiles[i][j].drawItselfOnMap(window, mapView);
+			tiles[i][j]->drawItselfOnMap(window, mapView);
 		}
 	}
 }
@@ -198,13 +198,13 @@ void Renderer::drawOptionsToWindow(sf::RenderWindow & window, sf::View& optionsV
 	test.drawItself(window, optionsView);
 }
 
-void Renderer::drawProductionToWindow(sf::RenderWindow& window, std::vector<sf::View>& views, std::vector<std::vector<Tile>>& tiles, e_tab& tabs)
+void Renderer::drawProductionToWindow(sf::RenderWindow& window, std::vector<sf::View>& views, Tile*** tiles, e_tab& tabs)
 {
 	window.setView(views[static_cast<int>(e_views::PRODUCTION)]);
 	window.draw(mapBackground);
 	for (int i = 0; i < tilesNums.x; i++) {
 		for (int j = 0; j < tilesNums.y; j++) {
-			tiles[i][j].drawItselfOnProduction(window, views[static_cast<int>(e_views::PRODUCTION)]);
+			tiles[i][j]->drawItselfOnProduction(window, views[static_cast<int>(e_views::PRODUCTION)]);
 		}
 	}
 	if (tabs == e_tab::PRODUCTION_CLICKED) {

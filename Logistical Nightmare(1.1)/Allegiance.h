@@ -17,7 +17,7 @@ public:
 	void addFactoryNumber();
 	void addTile(sf::Vector2i tileLocation);
 	bool ifLost()const;
-	void update(float elapsedTime, std::vector <std::vector <Tile> >& tiles);
+	void update(float elapsedTime, Tile*** tiles);
 	void setName(const std::string&);
 	float getConstructionPoints();
 	void setConstructionPoints(float constructionPt);
