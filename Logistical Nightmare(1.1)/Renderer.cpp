@@ -136,8 +136,8 @@ void Renderer::drawMapToWindow(sf::RenderWindow& window, sf::View& mapView, Tile
 {
 	window.setView(mapView);
 	window.draw(mapBackground);
-	for (int i = 0; i < tilesNums.x; i++) {
-		for (int j = 0; j < tilesNums.y; j++) {
+	for (int i = 0; i < tilesNums.y; i++) {
+		for (int j = 0; j < tilesNums.x; j++) {
 			tiles[i][j]->drawItselfOnMap(window, mapView);
 		}
 	}
@@ -202,8 +202,8 @@ void Renderer::drawProductionToWindow(sf::RenderWindow& window, std::vector<sf::
 {
 	window.setView(views[static_cast<int>(e_views::PRODUCTION)]);
 	window.draw(mapBackground);
-	for (int i = 0; i < tilesNums.x; i++) {
-		for (int j = 0; j < tilesNums.y; j++) {
+	for (int i = 0; i < tilesNums.y; i++) {
+		for (int j = 0; j < tilesNums.x; j++) {
 			tiles[i][j]->drawItselfOnProduction(window, views[static_cast<int>(e_views::PRODUCTION)]);
 		}
 	}

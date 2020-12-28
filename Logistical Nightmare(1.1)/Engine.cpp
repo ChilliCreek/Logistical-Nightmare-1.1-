@@ -19,7 +19,7 @@ Tile*** Engine::saveLoader(std::vector<Allegiance>& allegiances)
 	allegianceText1.setString(nameLeft);
 	allegianceText2.setString(nameRight);
 	
-	saveFile >> tilesNums.x >> tilesNums.y;
+	saveFile >> tilesNums.y >> tilesNums.x;
 
 	Tile*** tiles = new Tile**[tilesNums.y];
 
@@ -37,7 +37,7 @@ Tile*** Engine::saveLoader(std::vector<Allegiance>& allegiances)
 	while (saveFile.peek() != EOF) {
 		saveFile >> factoryCooX >> factoryCooY;
 		tiles[factoryCooX][factoryCooY]->addFactory();
-	}
+	} 
 	saveFile.close();
 	return tiles;
 }
@@ -303,7 +303,7 @@ void Engine::run()
 	allegiances.push_back(Allegiance());
     Tile*** tiles = saveLoader(allegiances);
 
-	mapSize = sf::Vector2f(tilesNums.x * TILE_SIZE, tilesNums.y * TILE_SIZE);
+	mapSize = sf::Vector2f(tilesNums.y * TILE_SIZE, tilesNums.x * TILE_SIZE);
 	e_gameStat gameStatus = e_gameStat::RUNNING;
 	//Max zoom and min zoom and setting the blue map background ( Did this way to prevent size distortion because of the different ratios between the map size and screen size)
 	if (mapSize.x / resolution.x < mapSize.y / resolution.y) {
@@ -378,6 +378,9 @@ void Engine::run()
 		}
 	}
 	for (int i = 0; i < tilesNums.y; i++) {
+		for (int j = 0; j < tilesNums.x; j++) {
+			delete tiles[i][j];
+		}
 		delete[] tiles[i];
 	}
 	delete[] tiles;
