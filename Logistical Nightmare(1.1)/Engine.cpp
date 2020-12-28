@@ -19,23 +19,20 @@ Tile*** Engine::saveLoader(std::vector<Allegiance>& allegiances)
 	allegianceText1.setString(nameLeft);
 	allegianceText2.setString(nameRight);
 	
-	saveFile >> tilesNums.y >> tilesNums.x;
+	saveFile >> tilesNums.x >> tilesNums.y;
 
-	Tile*** tiles = new Tile**[tilesNums.y];
-
-	for (int i = 0; i < tilesNums.y; i++) {
-		tiles[i] = (Tile**)malloc(sizeof(Tile*) * tilesNums.x);
+	Tile*** tiles = new Tile**[tilesNums.x];
+	for (int i = 0; i < tilesNums.x; i++) {
+		tiles[i] = (Tile**)malloc(sizeof(Tile*) * tilesNums.y);
 		int terrainNum, allegianceNum;
-		for (int j = 0; j < tilesNums.x; j++) {
+		for (int j = 0; j < tilesNums.y; j++) {
 			saveFile >> terrainNum >> allegianceNum;
 			tiles[i][j] = new Tile(terrainNum, sf::Vector2i(i, j));
 			allegiances[allegianceNum].addTile(sf::Vector2i(i, j));
 		}
 	}
-
 	int factoryCooX, factoryCooY;
-	while (saveFile.peek() != EOF) {
-		saveFile >> factoryCooX >> factoryCooY;
+	while (saveFile >> factoryCooX >> factoryCooY) {
 		tiles[factoryCooX][factoryCooY]->addFactory();
 	} 
 	saveFile.close();
@@ -45,18 +42,18 @@ Tile*** Engine::saveLoader(std::vector<Allegiance>& allegiances)
 //Easier than hard coding everything in the run method
 void Engine::equipmentStatSetter()
 {
-	allResearch.emplace_back("graphics/kar98k.png", 0.f, 0.f, 15.f, 5.f, 90.f, sf::Vector2f(300, 100), 10, -1);
-	allResearch.emplace_back("graphics/mp40.png", 0.f, 0.f, 30.f, 10.f, 79.f, sf::Vector2f(100, 300), 200, 0);
-	allResearch.emplace_back("graphics/panzerschreck.png", 0.f, 60.f, 5.f, 20.f, 85.f, sf::Vector2f(100, 500), 450, 1);
-	allResearch.emplace_back("graphics/panzerfaust.png", 0.f, 80.f, 2.f, 20.f, 80.f, sf::Vector2f(100, 700), 800, 2);
-	allResearch.emplace_back("graphics/anti_tank.png", 0.f, 80.f, 2.f, 20.f, 80.f, sf::Vector2f(100, 900), 830, 3);
-	allResearch.emplace_back("graphics/panzer_3_b.png", 30.f, 45.f, 25.f, 190.f, 92.f, sf::Vector2f(300, 300), 279, 0);
-	allResearch.emplace_back("graphics/panzer_4_g.png", 60.f, 90.f, 27.f, 240.f, 89.f, sf::Vector2f(300, 500), 689, 5);
-	allResearch.emplace_back("graphics/panther.png", 100.f, 145.f, 27.f, 320.f, 74.f, sf::Vector2f(300, 700), 756, 6);
-	allResearch.emplace_back("graphics/tiger_2_p.png", 130.f, 180.f, 40.f, 550.f, 60.f, sf::Vector2f(500, 500), 1520, 6);
-	allResearch.emplace_back("graphics/tiger_2_h.png", 160.f, 180.f, 40.f, 600.f, 65.f, sf::Vector2f(500, 700), 390, 8);
-	allResearch.emplace_back("graphics/maus.png", 0.f, 80.f, 2.f, 20.f, 80.f, sf::Vector2f(500, 900), 2345, 9);
-	allResearch.emplace_back("graphics/ConstructionPoints.png", 0.f, 80.f, 2.f, 20.f, 80.f, sf::Vector2f(700, 100), 10, -1);
+	allResearch.emplace_back("graphics/kar98k.png", 0.f, 0.f, 15.f, 20.f, 90.f, sf::Vector2f(300, 100), 10, -1);
+	allResearch.emplace_back("graphics/mp40.png", 0.f, 0.f, 30.f, 40.f, 79.f, sf::Vector2f(100, 300), 200, 0);
+	allResearch.emplace_back("graphics/panzerschreck.png", 0.f, 60.f, 5.f, 200.f, 85.f, sf::Vector2f(100, 500), 450, 1);
+	allResearch.emplace_back("graphics/panzerfaust.png", 0.f, 80.f, 2.f, 200.f, 80.f, sf::Vector2f(100, 700), 800, 2);
+	allResearch.emplace_back("graphics/anti_tank.png", 0.f, 80.f, 2.f, 200.f, 80.f, sf::Vector2f(100, 900), 830, 3);
+	allResearch.emplace_back("graphics/panzer_3_b.png", 30.f, 45.f, 25.f, 4000.f, 92.f, sf::Vector2f(300, 300), 279, 0);
+	allResearch.emplace_back("graphics/panzer_4_g.png", 60.f, 90.f, 27.f, 4800.f, 89.f, sf::Vector2f(300, 500), 689, 5);
+	allResearch.emplace_back("graphics/panther.png", 100.f, 145.f, 27.f, 6400.f, 74.f, sf::Vector2f(300, 700), 756, 6);
+	allResearch.emplace_back("graphics/tiger_2_p.png", 130.f, 180.f, 40.f, 11000.f, 60.f, sf::Vector2f(500, 500), 1520, 6);
+	allResearch.emplace_back("graphics/tiger_2_h.png", 160.f, 180.f, 40.f, 12000.f, 65.f, sf::Vector2f(500, 700), 390, 8);
+	allResearch.emplace_back("graphics/maus.png", 200.f, 200.f, 40.f, 25000.f, 65.f, sf::Vector2f(500, 900), 2345, 9);
+	allResearch.emplace_back("graphics/ConstructionPoints.png", 0.f, 80.f, 2.f, 200.f, 80.f, sf::Vector2f(700, 100), 10, -1);
 }
 
 //the general input method that runs every frame
@@ -162,19 +159,18 @@ void Engine::productionInput(sf::RenderWindow & window, std::vector<sf::View>& v
 	if (tabStatus == e_tab::PRODUCTION) {
 		sf::Vector2f mouseProductionPosition = window.mapPixelToCoords(mouseLocalPosition, views[static_cast<int>(e_views::PRODUCTION)]);
 		if (mouseProductionPosition.x >= 0 && mouseProductionPosition.x < mapSize.x && mouseProductionPosition.y >= 0 && mouseProductionPosition.y < mapSize.y) {
-			productionSelectedTile = sf::Vector2i(static_cast<int>(mouseProductionPosition.x / TILE_SIZE), static_cast<int>(mouseProductionPosition.y / TILE_SIZE));
+			productionSelectedTile = sf::Vector2i(static_cast<int>(mouseProductionPosition.y / TILE_SIZE), static_cast<int>(mouseProductionPosition.x / TILE_SIZE));
 			if (tiles[productionSelectedTile.x][productionSelectedTile.y]->hasFactory()) {
 				tabStatus = e_tab::PRODUCTION_CLICKED;
-				views[static_cast<int>(e_views::PRODUCTION)].setCenter(TILE_SIZE * (productionSelectedTile.x + 0.5f), TILE_SIZE * (productionSelectedTile.y + 0.5f));
+				views[static_cast<int>(e_views::PRODUCTION)].setCenter(TILE_SIZE * (productionSelectedTile.y + 0.5f), TILE_SIZE * (productionSelectedTile.x + 0.5f));
 			}
-			else if (allegiances[0].getConstructionPoints() > 2500.f) {
+			else if (allegiances[playerNum].getConstructionPoints() > 400.f) {
 				tiles[productionSelectedTile.x][productionSelectedTile.y]->addFactory();
-				allegiances[0].setConstructionPoints(allegiances[0].getConstructionPoints() - 2500.f);
+				allegiances[playerNum].setConstructionPoints(allegiances[playerNum].getConstructionPoints() - 400.f);
 			}
 		}
 	}
 	else if (tabStatus == e_tab::PRODUCTION_CLICKED) {
-		//std::cout << mouseLocalPosition.x << " " << mouseLocalPosition.y << std::endl;
 		if (mouseLocalPosition.x < (resolution.x * 0.4f)) {
 			sf::Vector2f mouseResPosition = window.mapPixelToCoords(mouseLocalPosition, views[static_cast<int>(e_views::RESEARCH_LEFT)]);
 			sf::FloatRect bounds;
@@ -299,8 +295,6 @@ void Engine::hudInput(sf::Vector2f mouseHudPos, e_tab& tab)
 void Engine::run()
 {
 	//start
-	allegiances.push_back(Allegiance());
-	allegiances.push_back(Allegiance());
     Tile*** tiles = saveLoader(allegiances);
 
 	mapSize = sf::Vector2f(tilesNums.y * TILE_SIZE, tilesNums.x * TILE_SIZE);
@@ -324,22 +318,35 @@ void Engine::run()
 
 	//Views (don't mess with the push_back order)
 	std::vector<sf::View> views;
+	views.reserve(9);
+	//HUD view
 	views.push_back(sf::View(sf::FloatRect(0, 0, resolution.x, resolution.y * 0.1f)));
 	views[0].setViewport(sf::FloatRect(0, 0, 1, 0.1f));
+	//Map view
 	views.push_back(sf::View(sf::Vector2f(mapSize.x / 2, mapSize.y / 2), sf::Vector2f(resolution.x, resolution.y * 0.9f)));
 	views[1].setViewport(sf::FloatRect(0, 0.1f, 1, 0.9f));
+	//Research left view
 	views.push_back(sf::View(sf::FloatRect(0, 0, resolution.x * 0.4f, resolution.y * 0.9f)));
 	views[2].setViewport(sf::FloatRect(0.f, 0.1f, 0.4f, 0.9f));
+	//Research right view
 	views.push_back(sf::View(sf::FloatRect(0, 0, resolution.x * 0.1f, resolution.y * 0.9f)));
 	views[3].setViewport(sf::FloatRect(0.9f, 0.1f, 0.1f, 0.9f));
+	//Production view
 	views.push_back(sf::View(sf::Vector2f(mapSize.x / 2, mapSize.y / 2), sf::Vector2f(resolution.x, resolution.y * 0.9f)));
 	views[4].setViewport(sf::FloatRect(0, 0.1f, 1, 0.9f));
+	//Logistics view
 	views.push_back(sf::View(sf::Vector2f(mapSize.x / 2, mapSize.y / 2), sf::Vector2f(resolution.x, resolution.y * 0.9f)));
 	views[5].setViewport(sf::FloatRect(0, 0.1f, 1, 0.9f));
+	//Building view
 	views.push_back(sf::View(sf::Vector2f(mapSize.x / 2, mapSize.y / 2), sf::Vector2f(resolution.x, resolution.y * 0.9f)));
 	views[6].setViewport(sf::FloatRect(0, 0.1f, 1, 0.9f));
+	//Options view
 	views.push_back(sf::View(sf::Vector2f(resolution.x / 4, resolution.y * 0.225f), sf::Vector2f(resolution.x / 2, resolution.y * 0.45f)));
 	views[7].setViewport(sf::FloatRect(0.25f, 0.325f, 0.5f, 0.45f));
+	//Equipment view
+	views.push_back(sf::View(sf::FloatRect(0, 0, resolution.x * 0.1f, resolution.y * 0.9f)));
+	views[8].setViewport(sf::FloatRect(0.9f, 0.1f, 0.1f, 0.9f));
+
 	//Tab status
 	e_tab tabStatus = e_tab::UNITS;
 
@@ -377,8 +384,8 @@ void Engine::run()
 			window.clear();
 		}
 	}
-	for (int i = 0; i < tilesNums.y; i++) {
-		for (int j = 0; j < tilesNums.x; j++) {
+	for (int i = 0; i < tilesNums.x; i++) {
+		for (int j = 0; j < tilesNums.y; j++) {
 			delete tiles[i][j];
 		}
 		delete[] tiles[i];

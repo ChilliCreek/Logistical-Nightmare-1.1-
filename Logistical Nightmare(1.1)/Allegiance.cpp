@@ -39,11 +39,6 @@ void Allegiance::setName(const std::string& name)
 	m_name = name;
 }
 
-float Allegiance::getConstructionPoints()
-{
-	return m_constructionPoints;
-}
-
 void Allegiance::setConstructionPoints(float constructionPt)
 {
 	m_constructionPoints = constructionPt;

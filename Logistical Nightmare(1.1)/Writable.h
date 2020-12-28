@@ -2,9 +2,6 @@
 #include"GUI_Drawable.h"
 
 class Writable : public GUI_Drawable{
-private:
-	sf::Text m_string;
-	sf::RectangleShape m_textField;
 public:
 	Writable(sf::Vector2f size, sf::Vector2f pos);
 	Writable(sf::Vector2f pos);
@@ -26,4 +23,7 @@ public:
 		m_clickedOrNot = false;
 	}
 	void drawItself(sf::RenderWindow& window, sf::View& view);
+private:
+	sf::Text m_string;
+	sf::RectangleShape m_textField;
 };

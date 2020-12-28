@@ -167,6 +167,7 @@
     <ClInclude Include="Researchable.h" />
     <ClInclude Include="TextureHolder.h" />
     <ClInclude Include="Tile.h" />
+    <ClInclude Include="Transportable.h" />
     <ClInclude Include="Unit.h" />
     <ClInclude Include="Writable.h" />
   </ItemGroup>
@@ -186,6 +187,7 @@
     <ClCompile Include="Researchable.cpp" />
     <ClCompile Include="TextureHolder.cpp" />
     <ClCompile Include="Tile.cpp" />
+    <ClCompile Include="Transportable.cpp" />
     <ClCompile Include="Unit.cpp" />
     <ClCompile Include="Writable.cpp" />
   </ItemGroup>

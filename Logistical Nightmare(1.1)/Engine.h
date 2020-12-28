@@ -15,16 +15,11 @@
 //To make code in Engine class less, created Renderer class to separate the draw/render part of the Engine. Engine is-a Renderer.
 class Engine : public Renderer
 {
+public:
+	void run();
 private:
-	static float MAX_ZOOM, MIN_ZOOM;
-	static float ZOOM_FACTOR_MAP;
-	static float ZOOM_FACTOR_PRODUCTION;
-	static float CAMERA_SENSITIVITY;
-	std::vector <Allegiance> allegiances;
-	sf::Vector2i productionSelectedTile;
 	Tile*** saveLoader(std::vector<Allegiance>& allegiances);
 	void equipmentStatSetter();
-	//Any mouse or a keyboard that SFML supports will work with this method.
 	void input(sf::RenderWindow& window, std::vector<sf::View>& views, sf::Vector2f resolution, e_tab& tabStatus, sf::Event& event, Tile*** tiles);
 	void hudInput(sf::Vector2f, e_tab&);
 	void researchInput(sf::RenderWindow& window, std::vector<sf::View>& views, sf::Vector2i mouseLocalPosition);
@@ -32,6 +27,9 @@ private:
 	void optionsInput(sf::Vector2f mouseGlobalPos);
 	void zoom(sf::View& mapView, float scrollDelta, float& zoomFactor);
 	void cameraMover(sf::View& view, sf::Vector2f boundsMax, sf::Vector2f boundsMin);
-public:
-	void run();
+	static float MAX_ZOOM, MIN_ZOOM;
+	static float ZOOM_FACTOR_MAP;
+	static float ZOOM_FACTOR_PRODUCTION;
+	static float CAMERA_SENSITIVITY;
+	sf::Vector2i productionSelectedTile;
 };

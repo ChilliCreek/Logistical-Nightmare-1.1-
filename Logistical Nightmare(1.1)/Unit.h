@@ -4,11 +4,10 @@
 
 class Unit 
 {
+public:
+	float getStrength();
 private:
 	float m_strength;
 	float m_armor;
 	float m_antiPersonnel;
-
-public:
-	float getStrength();
 };

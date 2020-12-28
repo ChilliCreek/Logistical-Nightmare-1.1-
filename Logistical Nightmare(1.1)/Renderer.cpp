@@ -12,7 +12,7 @@ sf::Font Renderer::font;
 std::string Renderer::monthStrings[12] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
 //resolution 
 sf::Vector2f Renderer::resolution = sf::Vector2f(sf::VideoMode::getDesktopMode().width, sf::VideoMode::getDesktopMode().height);
-Renderer::Renderer() : zoomSensitivity(sf::Vector2f(0, 0), 0.01f, 0.10f, resolution.x * 0.3f, "Zoom Sensitivity:", 0.05f), cameraSensitivity(sf::Vector2f(0, 100), 5.f, 30.f, resolution.x * 0.3f, "Camera Sensitivity:", 15.f), test(sf::Vector2f(50, 200))
+Renderer::Renderer() : zoomSensitivity(sf::Vector2f(0, 0), 0.01f, 0.10f, resolution.x * 0.3f, "Zoom Sensitivity:", 0.05f), cameraSensitivity(sf::Vector2f(0, 100), 5.f, 30.f, resolution.x * 0.3f, "Camera Sensitivity:", 15.f), test(sf::Vector2f(50, 200)), allegiances(2)
 {
 	allResearch.reserve(11);
 	//hud background
@@ -136,8 +136,8 @@ void Renderer::drawMapToWindow(sf::RenderWindow& window, sf::View& mapView, Tile
 {
 	window.setView(mapView);
 	window.draw(mapBackground);
-	for (int i = 0; i < tilesNums.y; i++) {
-		for (int j = 0; j < tilesNums.x; j++) {
+	for (int i = 0; i < tilesNums.x; i++) {
+		for (int j = 0; j < tilesNums.y; j++) {
 			tiles[i][j]->drawItselfOnMap(window, mapView);
 		}
 	}
@@ -202,13 +202,30 @@ void Renderer::drawProductionToWindow(sf::RenderWindow& window, std::vector<sf::
 {
 	window.setView(views[static_cast<int>(e_views::PRODUCTION)]);
 	window.draw(mapBackground);
-	for (int i = 0; i < tilesNums.y; i++) {
-		for (int j = 0; j < tilesNums.x; j++) {
+	for (int i = 0; i < tilesNums.x; i++) {
+		for (int j = 0; j < tilesNums.y; j++) {
 			tiles[i][j]->drawItselfOnProduction(window, views[static_cast<int>(e_views::PRODUCTION)]);
 		}
 	}
 	if (tabs == e_tab::PRODUCTION_CLICKED) {
 		drawResearchLeftToWindow(window, views);
+	}
+	window.setView(views[static_cast<int>(e_views::EQUIPMENT)]);
+	window.draw(researchBackgroundRight);
+	
+	Allegiance& player = allegiances[playerNum];
+	sf::Text disp;
+	disp.setFont(Renderer::font);
+	disp.setCharacterSize(16);
+
+	auto& equipmentList = player.getEquipmentStorage();
+
+	int pos = 0;
+	for (const auto& p : equipmentList) {
+		disp.setString(p.first + " " + std::to_string(p.second));
+		disp.setPosition(10, pos * 30);
+		window.draw(disp);
+		pos++;
 	}
 }
 

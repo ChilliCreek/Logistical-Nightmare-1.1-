@@ -16,35 +16,10 @@
 
 enum class e_tab { UNITS, RESEARCH, PRODUCTION, PRODUCTION_CLICKED, LOGISTICS, BUILDING, OPTIONS};
 enum class e_gameStat { RUNNING, PAUSED };
-enum class e_views {HUD, MAP, RESEARCH_LEFT, RESEARCH_RIGHT, PRODUCTION, LOGISTICS, BUILDING, OPTIONS};
+enum class e_views {HUD, MAP, RESEARCH_LEFT, RESEARCH_RIGHT, PRODUCTION, LOGISTICS, BUILDING, OPTIONS, EQUIPMENT};
 
 class Renderer
 {
-protected:
-	sf::Vector2i tilesNums;
-	sf::Vector2f mapSize;
-	sf::Vector2f selectedTile;
-	Adjustable zoomSensitivity;
-	Adjustable cameraSensitivity;
-	//DELETE LATER AFTER WRITABLE COMPLETION
-	Writable test;
-	std::vector<Researchable> allResearch;
-	std::unordered_map<std::string, int> stringToResIndex;
-	sf::RectangleShape hudBackground;
-	sf::RectangleShape researchBackgroundLeft;
-	sf::RectangleShape researchFrameLeft;
-	sf::RectangleShape researchBackgroundRight;
-	sf::RectangleShape mapBackground;
-	sf::RectangleShape gameSpeedButtonShade;
-	sf::RectangleShape optionsBackground;
-	sf::Text allegianceText1;
-	sf::Text allegianceText2;
-	sf::Text tabTexts[6];
-	sf::Text timeAndDate;
-	TextureHolder textureHolder;
-	sf::Sprite speedButtons;
-	sf::Sprite tabButtons[6];
-	float runTime = 0;
 public:
 	static int playerNum;
 	static sf::Font font;
@@ -66,4 +41,30 @@ public:
 	void drawProductionToWindow(sf::RenderWindow& window, std::vector<sf::View>& views, Tile*** tiles, e_tab& tabs);
 	static std::string secondsToDateAndTime(float sec);
 	static float distanceBetween2DPoints(float x1, float y1, float x2, float y2);
+protected:
+	sf::Vector2i tilesNums;
+	sf::Vector2f mapSize;
+	sf::Vector2f selectedTile;
+	Adjustable zoomSensitivity;
+	Adjustable cameraSensitivity;
+	std::vector <Allegiance> allegiances;
+	//DELETE LATER AFTER WRITABLE COMPLETION
+	Writable test;
+	std::vector<Researchable> allResearch;
+	std::unordered_map<std::string, int> stringToResIndex;
+	sf::RectangleShape hudBackground;
+	sf::RectangleShape researchBackgroundLeft;
+	sf::RectangleShape researchFrameLeft;
+	sf::RectangleShape researchBackgroundRight;
+	sf::RectangleShape mapBackground;
+	sf::RectangleShape gameSpeedButtonShade;
+	sf::RectangleShape optionsBackground;
+	sf::Text allegianceText1;
+	sf::Text allegianceText2;
+	sf::Text tabTexts[6];
+	sf::Text timeAndDate;
+	TextureHolder textureHolder;
+	sf::Sprite speedButtons;
+	sf::Sprite tabButtons[6];
+	float runTime = 0;
 };

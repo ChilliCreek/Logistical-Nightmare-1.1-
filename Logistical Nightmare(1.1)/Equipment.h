@@ -3,14 +3,6 @@
 
 class Equipment 
 {
-private:
-	float m_armor;
-	float m_reliability;
-	float m_productionCost;
-	float m_antiPersonnel;
-	float m_antiArmor;
-	sf::Sprite m_equipmentSprite;
-	std::string m_name;
 public:
 	static float m_TEXTURE_SCALE;
 	std::string getName()const;
@@ -20,4 +12,12 @@ public:
 	sf::Sprite getEquipmentSprite();
 	Equipment(const std::string& name, float armor, float antiArmor, float antiPersonnel, float productionCost, float reliability);
 	void setSpritePosition(sf::Vector2f position);
+private:
+	float m_armor;
+	float m_reliability;
+	float m_productionCost;
+	float m_antiPersonnel;
+	float m_antiArmor;
+	sf::Sprite m_equipmentSprite;
+	std::string m_name;
 };
