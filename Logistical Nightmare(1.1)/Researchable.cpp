@@ -9,26 +9,20 @@ void Researchable::doResearch()
 {
 	if(m_researchStatus == e_researchStatus::NOT_RESEARCHED && researchesInProgress < 3){
 		researchesInProgress++;
-		m_researchClock = new sf::Clock();
-		m_researchClock->restart();
 		m_researchStatus = e_researchStatus::IN_PROGRESS;
 		m_equipmentBackground.setOutlineColor(sf::Color::Yellow);
     }
 }
-void Researchable::update(int GAME_SPEED)
+void Researchable::update(int hours)
 {
-	m_resTimeCount += m_researchClock->restart().asSeconds() * GAME_SPEED;
-	if (m_researchClock != nullptr) {
-		if (m_resTimeCount > m_RESEARCH_TIME_SEC) {
-			researchesInProgress--;
-			delete[] m_researchClock;
-			m_researchClock = nullptr;
-			m_researchStatus = e_researchStatus::RESEARCHED;
-			m_equipmentBackground.setOutlineColor(sf::Color::Green);
-		}
-		else {
-			m_progressBarLeft.setSize(sf::Vector2f(m_progressBarFull.getLocalBounds().width * m_resTimeCount / m_RESEARCH_TIME_SEC, 10.f));
-		}
+	m_resHoursCount += hours;
+	if (m_resHoursCount > m_RESEARCH_HOURS) {
+		researchesInProgress--;
+		m_researchStatus = e_researchStatus::RESEARCHED;
+		m_equipmentBackground.setOutlineColor(sf::Color::Green);  
+	}
+	else {
+		m_progressBarLeft.setSize(sf::Vector2f(m_progressBarFull.getLocalBounds().width * m_resHoursCount / m_RESEARCH_HOURS, 10.f));
 	}
 }
 e_researchStatus& Researchable::isResearched()
@@ -39,7 +33,7 @@ Equipment& Researchable::getEquipment()
 {
 	return m_equipment;
 }
-Researchable::Researchable(std::string name, float armor, float antiArmor, float antiPersonnel, float productionCost, float reliability, sf::Vector2f position, float resTime, int prevRes) : m_RESEARCH_TIME_SEC(resTime), m_equipment(name, armor, antiArmor, antiPersonnel, productionCost, reliability) {
+Researchable::Researchable(std::string name, float armor, float antiArmor, float antiPersonnel, float productionCost, float reliability, sf::Vector2f position, int resHours, int prevRes) : m_RESEARCH_HOURS(resHours), m_equipment(name, armor, antiArmor, antiPersonnel, productionCost, reliability) {
 	prevResearchVectorLocation = prevRes;
 	m_equipmentBackground.setFillColor(sf::Color::White);
 	m_equipmentBackground.setOutlineThickness(-3.f);
@@ -48,8 +42,7 @@ Researchable::Researchable(std::string name, float armor, float antiArmor, float
 	m_equipmentBackground.setPosition(position);
 	m_researchStatus = e_researchStatus::NOT_RESEARCHED;
 	m_equipment.setSpritePosition(position);
-	m_researchClock = nullptr;
-	m_resTimeDays.setString(std::to_string(static_cast<int>(resTime / 8.64f)) + " days" );
+	m_resTimeDays.setString(std::to_string(resHours / 24) + " days" );
 	m_resTimeDays.setPosition(position.x + 4, position.y + 2);
 	m_resTimeDays.setCharacterSize(13);
 	m_resTimeDays.setFillColor(sf::Color::Black);

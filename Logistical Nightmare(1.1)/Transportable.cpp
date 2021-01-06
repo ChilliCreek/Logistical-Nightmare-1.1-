@@ -1,20 +1,30 @@
 #include "pch.h"
 #include "Transportable.h"
+#include"Functions.h"
+constexpr auto PI = 3.141592;
 
-Transportable::Transportable(const std::string & name, int quantity, int priority, sf::Vector2i destination, float transportTime) : m_name(name), m_quantity(quantity), m_priority(priority), m_destination(destination), m_transportTime(transportTime)
+Transportable::Transportable(const std::string & name, int quantity, int priority, float transportTime, int playerNum) : m_playerNum(playerNum), m_name(name), m_quantity(quantity), m_priority(priority), m_transportTime(transportTime)
 {
 
 }
 
 void Transportable::addPath(sf::Vector2i next)
 {
-	path.push_back(next);
-	m_destination = next;
+	addPath(next.x, next.y);
 }
 
 void Transportable::addPath(int nextX, int nextY)
 {
-	addPath(sf::Vector2i(nextX, nextY));
+	int currX = path.back().x;
+	int currY = path.back().y;
+	if (absDiff(currX, nextX) <= 1 && absDiff(currY, nextY) <= 1) {
+		path.push_back(sf::Vector2i(nextX, nextY));
+	}
+	else {
+		sf::Vector2i offset = nextTileDirection(std::atan2f(currX - nextX, nextY - currY) * 180.f / PI);
+		path.push_back(sf::Vector2i(currX + offset.x, currY + offset.y));
+		addPath(nextX, nextY);
+	}
 }
 
 bool Transportable::finished()
@@ -38,3 +48,14 @@ int Transportable::update(float time)
 	}
 	return 0;
 }
+
+TransportablePointer::TransportablePointer(const std::string & name, int quantity, int priority, float transportTime, int playerNum)
+{
+	pt = std::make_shared<Transportable>(name, quantity, priority, transportTime, playerNum);
+}
+
+TransportablePointer::TransportablePointer()
+{
+	pt = nullptr;
+}
+

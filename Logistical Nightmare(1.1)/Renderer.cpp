@@ -1,10 +1,7 @@
 #include "pch.h"
 #include "Renderer.h"
 
-#define PI 3.14159265
-
 //initialization of static variables
-const float Renderer::TIME_DILATION = 2500.f;
 float Renderer::ZOOM_SENSITIVITY = 0.05f;
 int Renderer::GAME_SPEED = 4;
 int Renderer::playerNum = 0;
@@ -12,9 +9,13 @@ sf::Font Renderer::font;
 std::string Renderer::monthStrings[12] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
 //resolution 
 sf::Vector2f Renderer::resolution = sf::Vector2f(sf::VideoMode::getDesktopMode().width, sf::VideoMode::getDesktopMode().height);
-Renderer::Renderer() : zoomSensitivity(sf::Vector2f(0, 0), 0.01f, 0.10f, resolution.x * 0.3f, "Zoom Sensitivity:", 0.05f), cameraSensitivity(sf::Vector2f(0, 100), 5.f, 30.f, resolution.x * 0.3f, "Camera Sensitivity:", 15.f), test(sf::Vector2f(50, 200)), allegiances(2)
+Renderer::Renderer() : zoomSensitivity(sf::Vector2f(0, 0), 0.01f, 0.10f, resolution.x * 0.3f, "Zoom Sensitivity:", 0.05f, font), cameraSensitivity(sf::Vector2f(0, 100), 5.f, 30.f, resolution.x * 0.3f, "Camera Sensitivity:", 15.f, font), allegiances(2), selectedLogisticsTile(-1, -1), exitButton(sf::Vector2f(10, 10))
 {
 	allResearch.reserve(11);
+	//exit button
+	exitButton.setFillColor(sf::Color::Red);
+	exitButton.setOutlineColor(sf::Color::Red);
+	exitButton.setOutlineThickness(-1);
 	//hud background
 	hudBackground.setFillColor(sf::Color::Black);
 	hudBackground.setPosition(0, 0);
@@ -80,6 +81,15 @@ Renderer::Renderer() : zoomSensitivity(sf::Vector2f(0, 0), 0.01f, 0.10f, resolut
 	gameSpeedButtonShade.setFillColor(sf::Color(255, 255, 255, 96));
 	gameSpeedButtonShade.setScale(0.4f, 0.4f);
 	gameSpeedButtonShade.setPosition(resolution.x * 0.4f + speedButtons.getLocalBounds().width * 0.6f * 0.4f, speedButtons.getGlobalBounds().top);
+	//Logistics:
+	sendButtonBackground.setPosition(200, 80);
+	sendButtonBackground.setSize(sf::Vector2f(60, 30));
+	sendButtonBackground.setFillColor(sf::Color::White);
+	sendButton.setFont(font);
+	sendButton.setCharacterSize(25);
+	sendButton.setPosition(200, 80);
+	sendButton.setString("Send");
+	sendButton.setFillColor(sf::Color::Black);
 	//Options:
 	optionsBackground.setPosition(0, 0);
 	optionsBackground.setSize(sf::Vector2f(resolution.x * 0.5f, resolution.y * 0.45f));
@@ -105,6 +115,8 @@ void Renderer::drawToWindow(sf::RenderWindow& window, std::vector<sf::View>& vie
 		drawProductionToWindow(window, views, tiles, tabs);
 		break;
 	case e_tab::LOGISTICS:
+		drawMapToWindow(window, views[static_cast<int>(e_views::MAP)], tiles);
+		drawLogisticsToWindow(window, views, tiles);
 		break;
 	case e_tab::BUILDING:
 		break;
@@ -128,7 +140,7 @@ void Renderer::drawHudToWindow(sf::RenderWindow& window, sf::View& hudView)
 	for (int i = 0; i < 6; i++) {
 		window.draw(tabTexts[i]);
 	}
-	timeAndDate.setString(Renderer::secondsToDateAndTime(runTime));
+	timeAndDate.setString(Renderer::hoursToDateAndTime(hours));
 	window.draw(timeAndDate);
 }
 
@@ -167,6 +179,21 @@ void Renderer::drawResearchRightToWindow(sf::RenderWindow& window, std::vector<s
 	}
 }
 
+void Renderer::drawLogisticsToWindow(sf::RenderWindow & window, std::vector<sf::View>& views, Tile*** tiles)
+{
+	if (selectedLogisticsTile.x != -1) {
+		window.setView(views[static_cast<int>(e_views::LOGISTICS)]);
+		window.draw(optionsBackground);
+		exitButton.setPosition(0, 0);
+		window.draw(exitButton);
+		tiles[selectedLogisticsTile.x][selectedLogisticsTile.y]->drawItselfOnLogistics(window, views[static_cast<int>(e_views::LOGISTICS)]);
+		if (tiles[selectedLogisticsTile.x][selectedLogisticsTile.y]->getSelectedEquipment() != "None") {
+			window.draw(sendButtonBackground);
+			window.draw(sendButton);
+		}
+	}
+}
+
 void Renderer::drawResearchLeftToWindow(sf::RenderWindow& window, std::vector<sf::View>& views)
 {
 	window.setView(views[static_cast<int>(e_views::RESEARCH_LEFT)]);
@@ -195,7 +222,6 @@ void Renderer::drawOptionsToWindow(sf::RenderWindow & window, sf::View& optionsV
 	window.draw(optionsBackground);
 	zoomSensitivity.drawItself(window, optionsView);
 	cameraSensitivity.drawItself(window, optionsView);
-	test.drawItself(window, optionsView);
 }
 
 void Renderer::drawProductionToWindow(sf::RenderWindow& window, std::vector<sf::View>& views, Tile*** tiles, e_tab& tabs)
@@ -229,11 +255,10 @@ void Renderer::drawProductionToWindow(sf::RenderWindow& window, std::vector<sf::
 	}
 }
 
-std::string Renderer::secondsToDateAndTime(float sec)
+std::string Renderer::hoursToDateAndTime(int hours)
 {
-	e_tab res = e_tab(1);
-	sec = sec * TIME_DILATION;
-	float days = (sec / 86400.f);
+	int days = hours / 24;
+	hours = hours % 24;
 	int year = 1;
 	std::stringstream ss;
 
@@ -317,12 +342,6 @@ std::string Renderer::secondsToDateAndTime(float sec)
 			break;
 		}
 	}
-	int hours = (days - float(int(days))) / (1.f / 24.f);
-	ss << monthStrings[month - 1] << " " << int(days) + 1 << " " << (year + 1940) << "  " << hours << ":00";
+	ss << monthStrings[month - 1] << " " << days + 1 << " " << (year + 1940) << "  " << hours << ":00";
 	return ss.str();
-}
-
-float Renderer::distanceBetween2DPoints(float x1, float y1, float x2, float y2)
-{
-	return std::sqrt(std::powf(x1 - x2, 2) + std::powf(y1 - y2, 2));
 }

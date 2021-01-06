@@ -1,10 +1,9 @@
 #include "pch.h"
 #include "Writable.h"
-#include "Renderer.h"
 
-Writable::Writable(sf::Vector2f size, sf::Vector2f pos) : m_textField(size)
+Writable::Writable(sf::Vector2f size, sf::Vector2f pos, const sf::Font& font) : m_textField(size)
 {
-	m_string.setFont(Renderer::font);
+	m_string.setFont(font);
 	m_string.setCharacterSize(25);
 	m_string.setFillColor(sf::Color::White);
 	m_string.setPosition(pos);
@@ -12,7 +11,7 @@ Writable::Writable(sf::Vector2f size, sf::Vector2f pos) : m_textField(size)
 	m_textField.setPosition(pos);
 }
 
-Writable::Writable(sf::Vector2f pos) : Writable(sf::Vector2f(180, 30), pos)
+Writable::Writable(sf::Vector2f pos, const sf::Font& font) : Writable(sf::Vector2f(180, 30), pos, font)
 {
 }
 

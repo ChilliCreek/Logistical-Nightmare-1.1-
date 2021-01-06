@@ -19,40 +19,28 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Allegiance.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="TextureHolder.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Tile.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Unit.h">
-      <Filter>Source Files</Filter>
+      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Engine.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Researchable.h">
-      <Filter>Source Files</Filter>
+      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Equipment.h">
-      <Filter>Source Files</Filter>
+      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Renderer.h">
-      <Filter>Source Files</Filter>
+      <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Writable.h">
-      <Filter>Source Files</Filter>
+    <ClInclude Include="Researchable.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Adjustable.h">
-      <Filter>Source Files</Filter>
+    <ClInclude Include="TextureHolder.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="GUI_Drawable.h">
-      <Filter>Source Files</Filter>
+    <ClInclude Include="Tile.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Transportable.h">
-      <Filter>Source Files</Filter>
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -71,9 +59,6 @@
     <ClCompile Include="Tile.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Unit.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Engine.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -84,12 +69,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Renderer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Writable.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Adjustable.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Transportable.cpp">

@@ -1,14 +1,15 @@
 #include "pch.h"
 #include "Adjustable.h"
-#include"Renderer.h"
+#include"Functions.h"
 #include<iostream>
+
 std::stringstream Adjustable::ss;
-Adjustable::Adjustable(sf::Vector2f pos, float minVal, float maxVal, float size, const std::string& labelString, float defaultVal)
+Adjustable::Adjustable(sf::Vector2f pos, float minVal, float maxVal, float size, const std::string& labelString, float defaultVal, const sf::Font& font)
 {
 	m_minValFloat = minVal;
 	m_maxValFloat = maxVal;
 
-	m_label.setFont(Renderer::font);
+	m_label.setFont(font);
 	m_label.setPosition(pos);
 	m_label.setString(labelString);
 	m_label.setCharacterSize(30);
@@ -17,21 +18,21 @@ Adjustable::Adjustable(sf::Vector2f pos, float minVal, float maxVal, float size,
 
 	m_spectrum.setSize(sf::Vector2f(size, 6.f));
 	m_spectrum.setFillColor(sf::Color::Black);
-	m_spectrum.setPosition(sf::Vector2f(m_label.getGlobalBounds().left + m_label.getLocalBounds().width + 5.f, pos.y + 15.f));
+	m_spectrum.setPosition(sf::Vector2f(m_label.getGlobalBounds().left + m_label.getLocalBounds().width + 10.f, pos.y + 15.f));
 
-	m_minVal.setFont(Renderer::font);
+	m_minVal.setFont(font);
 	m_minVal.setString(Adjustable::floatToString(minVal, 2));
 	m_minVal.setCharacterSize(10.f);
 	m_minVal.setPosition(sf::Vector2f(m_spectrum.getPosition().x, m_spectrum.getPosition().y + 6.f));
 	m_minVal.setFillColor(sf::Color::White);
 
-	m_currentVal.setFont(Renderer::font);
+	m_currentVal.setFont(font);
 	m_currentVal.setString(Adjustable::floatToString(defaultVal, 3));
 	m_currentVal.setCharacterSize(10.f);
 	m_currentVal.setPosition(m_spectrum.getPosition().x + defaultVal / (maxVal - minVal) * m_spectrum.getLocalBounds().width, m_spectrum.getPosition().y + 15.f);
 	m_currentVal.setFillColor(sf::Color::White);
 
-	m_maxVal.setFont(Renderer::font);
+	m_maxVal.setFont(font);
 	m_maxVal.setString(Adjustable::floatToString(maxVal, 2));
 	m_maxVal.setCharacterSize(10.f);
 	m_maxVal.setPosition(sf::Vector2f(m_spectrum.getGlobalBounds().left + m_spectrum.getLocalBounds().width - m_maxVal.getLocalBounds().width, m_spectrum.getPosition().y + 6.f));
@@ -85,7 +86,7 @@ void Adjustable::setMovablePosition(sf::Vector2f mousePos)
 
 bool Adjustable::circleContains(sf::CircleShape& circle, sf::Vector2f point)
 {
-	if (Renderer::distanceBetween2DPoints(circle.getPosition().x, circle.getPosition().y, point.x, point.y) < circle.getRadius()) {
+	if (distanceBetween2DPoints(circle.getPosition().x, circle.getPosition().y, point.x, point.y) < circle.getRadius()) {
 		return true;
 	}
 	else {
@@ -95,4 +96,15 @@ bool Adjustable::circleContains(sf::CircleShape& circle, sf::Vector2f point)
 
 float Adjustable::getVal() {
 	return m_minValFloat + (m_movable.getPosition().x - m_spectrum.getPosition().x) / m_spectrum.getLocalBounds().width * (m_maxValFloat - m_minValFloat);
+}
+
+void Adjustable::setValues(float minVal, float maxVal, float defaultVal)
+{
+	m_minValFloat = minVal;
+	m_maxValFloat = maxVal;
+	m_minVal.setString(Adjustable::floatToString(minVal, 2));
+	m_maxVal.setString(Adjustable::floatToString(maxVal, 2));
+	m_currentVal.setString(Adjustable::floatToString(defaultVal, 3));
+	m_movable.setPosition(m_spectrum.getPosition().x + defaultVal / (maxVal - minVal) * m_spectrum.getLocalBounds().width, m_spectrum.getPosition().y + 3.f);
+	m_currentVal.setPosition(m_spectrum.getPosition().x + defaultVal / (maxVal - minVal) * m_spectrum.getLocalBounds().width, m_spectrum.getPosition().y + 15.f);
 }

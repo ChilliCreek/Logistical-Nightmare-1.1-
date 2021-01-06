@@ -27,7 +27,7 @@ Tile*** Engine::saveLoader(std::vector<Allegiance>& allegiances)
 		int terrainNum, allegianceNum;
 		for (int j = 0; j < tilesNums.y; j++) {
 			saveFile >> terrainNum >> allegianceNum;
-			tiles[i][j] = new Tile(terrainNum, sf::Vector2i(i, j));
+			tiles[i][j] = new Tile(terrainNum, sf::Vector2i(i, j), allegianceNum);
 			allegiances[allegianceNum].addTile(sf::Vector2i(i, j));
 		}
 	}
@@ -56,8 +56,18 @@ void Engine::equipmentStatSetter()
 	allResearch.emplace_back("graphics/ConstructionPoints.png", 0.f, 80.f, 2.f, 200.f, 80.f, sf::Vector2f(700, 100), 10, -1);
 }
 
+int Engine::handleTime(int& hours, float sec)
+{
+	static float deltaTime = 0;
+	deltaTime += sec;
+	int newHours = static_cast<int>(deltaTime / (TIME_RATIO / GAME_SPEED));
+	deltaTime = fmod(deltaTime, TIME_RATIO / GAME_SPEED);
+	hours = hours + newHours;
+	return newHours;
+}
+
 //the general input method that runs every frame
-void Engine::input(sf::RenderWindow& window, std::vector<sf::View>& views, sf::Vector2f resolution, e_tab& tabStatus, sf::Event& event, Tile*** tiles)
+void Engine::input(sf::RenderWindow& window, std::vector<sf::View>& views, sf::Vector2f resolution, e_tab& tabStatus, Tile*** tiles)
 {
 	//To make the code more readable
 	sf::View& mapView = views[static_cast<int>(e_views::MAP)];
@@ -68,7 +78,7 @@ void Engine::input(sf::RenderWindow& window, std::vector<sf::View>& views, sf::V
 		switch (event.type) 
 		{   
 		    case sf::Event::MouseWheelScrolled:
-				if (tabStatus == e_tab::UNITS) {
+				if (tabStatus == e_tab::UNITS || (tabStatus == e_tab::LOGISTICS && selectedLogisticsTile.x == -1)) {
 					zoom(mapView, event.mouseWheelScroll.delta, Engine::ZOOM_FACTOR_MAP);
 				}
 				else if (tabStatus == e_tab::PRODUCTION || tabStatus == e_tab::PRODUCTION_CLICKED) {
@@ -89,6 +99,9 @@ void Engine::input(sf::RenderWindow& window, std::vector<sf::View>& views, sf::V
 					else if (tabStatus == e_tab::PRODUCTION || tabStatus == e_tab::PRODUCTION_CLICKED) {
 						productionInput(window, views, screenPosition, tabStatus, tiles);
 					}
+					else if (tabStatus == e_tab::LOGISTICS) {
+						logisticsInput(window, views, screenPosition, tiles, tabStatus);
+					}
 					else if (tabStatus == e_tab::OPTIONS) {
 						optionsInput(window.mapPixelToCoords(screenPosition, views[static_cast<int>(e_views::OPTIONS)]));
 					}
@@ -98,21 +111,27 @@ void Engine::input(sf::RenderWindow& window, std::vector<sf::View>& views, sf::V
 				}
 				break; }
 			case sf::Event::MouseButtonReleased:
-				if (tabStatus == e_tab::OPTIONS && event.mouseButton.button == sf::Mouse::Left) {
-					if (zoomSensitivity.isClicked()) {
-						zoomSensitivity.setClickedOrNot(false, window.mapPixelToCoords(screenPosition, views[static_cast<int>(e_views::OPTIONS)]));
+				if (event.mouseButton.button == sf::Mouse::Left) {
+					if (tabStatus == e_tab::OPTIONS) {
+						if (zoomSensitivity.isClicked()) {
+							zoomSensitivity.setClickedOrNot(false, window.mapPixelToCoords(screenPosition, views[static_cast<int>(e_views::OPTIONS)]));
+						}
+						if (cameraSensitivity.isClicked()) {
+							cameraSensitivity.setClickedOrNot(false, window.mapPixelToCoords(screenPosition, views[static_cast<int>(e_views::OPTIONS)]));
+						}
 					}
-					if (cameraSensitivity.isClicked()) {
-						cameraSensitivity.setClickedOrNot(false, window.mapPixelToCoords(screenPosition, views[static_cast<int>(e_views::OPTIONS)]));
+					else if (tabStatus == e_tab::LOGISTICS) {
+						if (selectedLogisticsTile.x != -1) {
+							if (tiles[selectedLogisticsTile.x][selectedLogisticsTile.y]->getSelectedEquipment() != "None") {
+								if (tiles[selectedLogisticsTile.x][selectedLogisticsTile.y]->getAdjustable().isClicked()) {
+									tiles[selectedLogisticsTile.x][selectedLogisticsTile.y]->getAdjustable().setClickedOrNot(false, window.mapPixelToCoords(screenPosition, views[static_cast<int>(e_views::LOGISTICS)]));
+								}
+							}
+						}
 					}
 				}
 				break;
 			case sf::Event::TextEntered:
-				if (tabStatus == e_tab::OPTIONS) {
-					if (test.isClicked()) {
-						test.addNumber(event.text.unicode);
-					}
-				}
 				break;
 		}
 	}
@@ -131,7 +150,15 @@ void Engine::input(sf::RenderWindow& window, std::vector<sf::View>& views, sf::V
 		cameraMover(views[static_cast<int>(e_views::RESEARCH_LEFT)], sf::Vector2f(researchBackgroundLeft.getSize().x - resolution.x * 0.2f, researchBackgroundLeft.getSize().y - resolution.y * 0.45f), sf::Vector2f(resolution.x * 0.2f, resolution.y * 0.45f));
 		researchFrameLeft.setPosition(views[static_cast<int>(e_views::RESEARCH_LEFT)].getCenter());
 	}
-
+	else if (tabStatus == e_tab::LOGISTICS) {
+		if (selectedLogisticsTile.x == -1) {
+			cameraMover(mapView, sf::Vector2f(mapSize.x, mapSize.y), sf::Vector2f(0, 0));
+		}
+		else if(tiles[selectedLogisticsTile.x][selectedLogisticsTile.y]->getAdjustable().isClicked()){
+			tiles[selectedLogisticsTile.x][selectedLogisticsTile.y]->getAdjustable().setMovablePosition(window.mapPixelToCoords(screenPosition, views[static_cast<int>(e_views::LOGISTICS)]));
+			tiles[selectedLogisticsTile.x][selectedLogisticsTile.y]->setEquipmentNumSelected(int(tiles[selectedLogisticsTile.x][selectedLogisticsTile.y]->getAdjustable().getVal()));
+		}
+	}
 	if (zoomSensitivity.isClicked()) {
 		zoomSensitivity.setMovablePosition(window.mapPixelToCoords(screenPosition, views[static_cast<int>(e_views::OPTIONS)]));
 		ZOOM_SENSITIVITY = zoomSensitivity.getVal();
@@ -139,6 +166,59 @@ void Engine::input(sf::RenderWindow& window, std::vector<sf::View>& views, sf::V
 	if (cameraSensitivity.isClicked()) {
 		cameraSensitivity.setMovablePosition(window.mapPixelToCoords(screenPosition, views[static_cast<int>(e_views::OPTIONS)]));
 		CAMERA_SENSITIVITY = cameraSensitivity.getVal();
+	}
+}
+
+void Engine::hudInput(sf::Vector2f mouseHudPos, e_tab& tab)
+{
+	if (mouseHudPos.y > (resolution.y * 0.05f)) {
+		switch (int(mouseHudPos.x / (resolution.x / 6))) {
+		case 0:
+			tab = e_tab::UNITS;
+			break;
+		case 1:
+			tab = e_tab::RESEARCH;
+			break;
+		case 2:
+			tab = e_tab::PRODUCTION;
+			break;
+		case 3:
+			tab = e_tab::LOGISTICS;
+			break;
+		case 4:
+			tab = e_tab::BUILDING;
+			break;
+		case 5:
+			tab = e_tab::OPTIONS;
+			break;
+		default:
+			tab = e_tab::OPTIONS;
+			break;
+		}
+	}
+	if (speedButtons.getGlobalBounds().contains(mouseHudPos)) {
+		switch (static_cast<int>((mouseHudPos.x - speedButtons.getGlobalBounds().left) / (speedButtons.getGlobalBounds().width / 5))) {
+		case 0:
+			GAME_SPEED = 0;
+			gameSpeedButtonShade.setPosition(resolution.x * 0.4f, speedButtons.getGlobalBounds().top);
+			break;
+		case 1:
+			GAME_SPEED = 1;
+			gameSpeedButtonShade.setPosition(resolution.x * 0.4f + speedButtons.getLocalBounds().width * 0.2f * 0.4f, speedButtons.getGlobalBounds().top);
+			break;
+		case 2:
+			GAME_SPEED = 4;
+			gameSpeedButtonShade.setPosition(resolution.x * 0.4f + speedButtons.getLocalBounds().width * 0.4f * 0.4f, speedButtons.getGlobalBounds().top);
+			break;
+		case 3:
+			GAME_SPEED = 8;
+			gameSpeedButtonShade.setPosition(resolution.x * 0.4f + speedButtons.getLocalBounds().width * 0.6f * 0.4f, speedButtons.getGlobalBounds().top);
+			break;
+		case 4:
+			GAME_SPEED = 16;
+			gameSpeedButtonShade.setPosition(resolution.x * 0.4f + speedButtons.getLocalBounds().width * 0.8f * 0.4f, speedButtons.getGlobalBounds().top);
+			break;
+		}
 	}
 }
 
@@ -196,6 +276,62 @@ void Engine::productionInput(sf::RenderWindow & window, std::vector<sf::View>& v
 	}
 }
 
+void Engine::logisticsInput(sf::RenderWindow & window, std::vector<sf::View>& views, sf::Vector2i mouseLocalPosition, Tile*** tiles, e_tab tabStatus)
+{
+	if (tabStatus == e_tab::LOGISTICS) {
+		//If a tile is not currently selected in the Logistics tab, select a tab.
+		if (selectedLogisticsTile.x == -1) {
+			sf::Vector2f mouseMapPosition = window.mapPixelToCoords(mouseLocalPosition, views[static_cast<int>(e_views::MAP)]);
+			selectedLogisticsTile = sf::Vector2i(static_cast<int>(mouseMapPosition.y / TILE_SIZE), static_cast<int>(mouseMapPosition.x / TILE_SIZE));
+		}
+		//If a tile is already selected then the equipment minitab is open.
+		else {
+			sf::Vector2f mouseLogisticsPosition = window.mapPixelToCoords(mouseLocalPosition, views[static_cast<int>(e_views::LOGISTICS)]);
+			if (mouseLogisticsPosition.x > 10 && mouseLogisticsPosition.x < 160) {
+				std::unordered_map <std::string, int>& storage = tiles[selectedLogisticsTile.x][selectedLogisticsTile.y]->getStorage();
+				//If any of the equipemtn is chosen.
+				if (mouseLogisticsPosition.y > 10 && mouseLogisticsPosition.y < storage.size() * 35 + 5) {
+					if (fmod(mouseLogisticsPosition.y - 10, 35) < 30.f) {
+						int i = 0;
+						std::unordered_map <std::string, int>::iterator selected;
+						for (selected = storage.begin(); selected != storage.end(); selected++) {
+							if (i == static_cast<int>((mouseLogisticsPosition.y - 10) / 35)) {
+								//Select an Equipment to send.
+								tiles[selectedLogisticsTile.x][selectedLogisticsTile.y]->setSelectedEquipment(selected->first);
+								tiles[selectedLogisticsTile.x][selectedLogisticsTile.y]->setEquipmentNumSelected(0);
+								break;
+							}
+							i++;
+						}
+					}
+				}
+			}
+			else {
+				auto& tempAdj = tiles[selectedLogisticsTile.x][selectedLogisticsTile.y]->getAdjustable();
+				//Exit the equipment minitab and deselect the tile.
+				if (exitButton.getGlobalBounds().contains(mouseLogisticsPosition)) {
+					tiles[selectedLogisticsTile.x][selectedLogisticsTile.y]->setEquipmentNumSelected(0);
+					selectedLogisticsTile.x = -1;
+				}
+				//Send the equipment currently chosen with the user set amount and priority.
+				else if (sendButtonBackground.getGlobalBounds().contains(mouseLogisticsPosition)) {
+					tabStatus = e_tab::LOGISTICS_SEND;
+					tiles[selectedLogisticsTile.x][selectedLogisticsTile.y]->initializeTransportable();
+				}
+				//Set the amount of equipment to send+
+				else if (tempAdj.movableContains(mouseLogisticsPosition)) {
+					if (!tempAdj.isClicked()) {
+						tempAdj.setClickedOrNot(true, mouseLogisticsPosition);
+					}
+				}
+			}
+		}
+	}
+	else {
+
+	}
+}
+
 void Engine::optionsInput(sf::Vector2f mouseGlobalPos)
 {
 	if (zoomSensitivity.movableContains(mouseGlobalPos) && zoomSensitivity.isClicked() == false) {
@@ -203,9 +339,6 @@ void Engine::optionsInput(sf::Vector2f mouseGlobalPos)
 	}
 	if (cameraSensitivity.movableContains(mouseGlobalPos) && zoomSensitivity.isClicked() == false) {
 		cameraSensitivity.setClickedOrNot(true, mouseGlobalPos);
-	}
-	if (!test.setClickedTrue(mouseGlobalPos)) {
-		test.setClickedFalse();
 	}
 }
 
@@ -236,59 +369,6 @@ void Engine::cameraMover(sf::View& view, sf::Vector2f boundsMax, sf::Vector2f bo
 	}
 	else if (sf::Keyboard::isKeyPressed(sf::Keyboard::D) && view.getCenter().x < (boundsMax.x - CAMERA_SENSITIVITY)) {
 		view.setCenter(sf::Vector2f(view.getCenter().x + CAMERA_SENSITIVITY, view.getCenter().y));
-	}
-}
-
-void Engine::hudInput(sf::Vector2f mouseHudPos, e_tab& tab)
-{
-	if (mouseHudPos.y > (resolution.y * 0.05f)) {
-		switch (int (mouseHudPos.x / (resolution.x / 6))) {
-		    case 0:
-				tab = e_tab::UNITS;
-				break;
-			case 1:
-				tab = e_tab::RESEARCH;
-				break;
-			case 2:
-				tab = e_tab::PRODUCTION;
-				break;
-			case 3:
-				tab = e_tab::LOGISTICS;
-				break;
-			case 4:
-				tab = e_tab::BUILDING;
-				break;
-			case 5:
-				tab = e_tab::OPTIONS;
-				break;
-			default:
-				tab = e_tab::OPTIONS;
-				break;
-		}
-	}
-	if (speedButtons.getGlobalBounds().contains(mouseHudPos)) {
-		switch (static_cast<int>((mouseHudPos.x - speedButtons.getGlobalBounds().left) / (speedButtons.getGlobalBounds().width / 5))) {
-		    case 0:
-				GAME_SPEED = 0;
-				gameSpeedButtonShade.setPosition(resolution.x * 0.4f, speedButtons.getGlobalBounds().top);
-				break;
-			case 1:
-				GAME_SPEED = 1;
-				gameSpeedButtonShade.setPosition(resolution.x * 0.4f + speedButtons.getLocalBounds().width * 0.2f * 0.4f, speedButtons.getGlobalBounds().top);
-				break;
-			case 2:
-				GAME_SPEED = 4;
-				gameSpeedButtonShade.setPosition(resolution.x * 0.4f + speedButtons.getLocalBounds().width * 0.4f * 0.4f, speedButtons.getGlobalBounds().top);
-				break;
-			case 3:
-				GAME_SPEED = 8;
-				gameSpeedButtonShade.setPosition(resolution.x * 0.4f + speedButtons.getLocalBounds().width * 0.6f * 0.4f, speedButtons.getGlobalBounds().top);
-				break;
-			case 4:
-				GAME_SPEED = 16;
-				gameSpeedButtonShade.setPosition(resolution.x * 0.4f + speedButtons.getLocalBounds().width * 0.8f * 0.4f, speedButtons.getGlobalBounds().top);
-				break;
-		}
 	}
 }
 
@@ -335,8 +415,8 @@ void Engine::run()
 	views.push_back(sf::View(sf::Vector2f(mapSize.x / 2, mapSize.y / 2), sf::Vector2f(resolution.x, resolution.y * 0.9f)));
 	views[4].setViewport(sf::FloatRect(0, 0.1f, 1, 0.9f));
 	//Logistics view
-	views.push_back(sf::View(sf::Vector2f(mapSize.x / 2, mapSize.y / 2), sf::Vector2f(resolution.x, resolution.y * 0.9f)));
-	views[5].setViewport(sf::FloatRect(0, 0.1f, 1, 0.9f));
+	views.push_back(sf::View(sf::Vector2f(resolution.x / 4, resolution.y * 0.225f), sf::Vector2f(resolution.x / 2, resolution.y * 0.45f)));
+	views[5].setViewport(sf::FloatRect(0.25f, 0.325f, 0.5f, 0.45f));
 	//Building view
 	views.push_back(sf::View(sf::Vector2f(mapSize.x / 2, mapSize.y / 2), sf::Vector2f(resolution.x, resolution.y * 0.9f)));
 	views[6].setViewport(sf::FloatRect(0, 0.1f, 1, 0.9f));
@@ -350,38 +430,34 @@ void Engine::run()
 	//Tab status
 	e_tab tabStatus = e_tab::UNITS;
 
-	//Event for input
-	sf::Event event;
-
-	//Runtime clock
-	sf::Clock clock; float deltaTime;
-
 	//Setting stats for equipments
 	equipmentStatSetter();
+
+	//Runtime clock
+	sf::Clock clock; int newHours;
 
 	while (window.isOpen()) {
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Escape)) {
 			window.close();
 		}
 		else {
-			deltaTime = clock.restart().asSeconds() * Renderer::GAME_SPEED;
-			runTime += deltaTime;
-			//updating the tiles and thr two sides (allegiances)
+			newHours = handleTime(hours, clock.restart().asSeconds());
+			//updating the tiles and the two sides-allegiances
 			for (int i = 0; i < 2; i++) {
-				allegiances[i].update(deltaTime, tiles);
+				if(newHours > 0)allegiances[i].update(newHours, tiles);
 			}
 			//updating the research
 			for (auto& res : allResearch) {
-				if (res.isResearched() == e_researchStatus::IN_PROGRESS) {
-					res.update(Renderer::GAME_SPEED);
-				}
+				if (res.isResearched() == e_researchStatus::IN_PROGRESS && newHours > 0)res.update(newHours);
 			}
 			allegianceText1.setString(allegiances[0].getName() + " CP: " + std::to_string(static_cast<int>(allegiances[0].getConstructionPoints())));
 			allegianceText2.setString(allegiances[1].getName() + " CP: " + std::to_string(static_cast<int>(allegiances[1].getConstructionPoints())));
-			input(window, views, resolution, tabStatus, event, tiles);
-			drawToWindow(window, views, tabStatus, tiles);
-			window.display();
-			window.clear();
+			input(window, views, resolution, tabStatus, tiles);
+			if (newHours > 0) {
+				drawToWindow(window, views, tabStatus, tiles);
+				window.display();
+				window.clear();
+			}
 		}
 	}
 	for (int i = 0; i < tilesNums.x; i++) {

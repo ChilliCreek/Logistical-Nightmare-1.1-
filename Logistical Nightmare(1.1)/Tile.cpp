@@ -2,7 +2,7 @@
 #include"Tile.h"
 #include"Renderer.h"
 #include<iostream>
-Tile::Tile(int terrain, sf::Vector2i pos)
+Tile::Tile(int terrain, sf::Vector2i pos, int playerNum) : m_equipmentNumSelector(sf::Vector2f(200, 50), 0, 0, 120.f, "To send:", 0, Renderer::font), m_playerNum(playerNum), m_priorityGetter(sf::Vector2f(300, 50), Renderer::font)
 {
 	m_beingProduced.setPosition(Renderer::TILE_SIZE * pos.y, Renderer::TILE_SIZE * pos.x + Renderer::TILE_SIZE / 2);
 	m_beingProduced.setScale(0.25f, 0.25f);
@@ -21,9 +21,16 @@ Tile::Tile(int terrain, sf::Vector2i pos)
 	m_tileRec.setOutlineColor(sf::Color::Black);
 	m_tileRec.setOutlineThickness(2);
 
+	m_equipmentBackground.setPosition(10, 10);
+	m_equipmentBackground.setSize(sf::Vector2f(150, 30));
+	m_equipmentBackground.setFillColor(sf::Color::White);
+	m_equipmentBackground.setOutlineThickness(-1);
+	m_equipmentBackground.setOutlineColor(sf::Color::Black);
+
 	m_terrain = terrain;
 	m_hasFactory = false;
 	m_inProduction = "ConstructionPoints";
+
 }
 
 bool Tile::hasFactory() const
@@ -44,12 +51,14 @@ void Tile::setEquipmentInProduction(const std::string& equipmentName, float prod
 	m_inProduction = equipmentName.substr(9, equipmentName.length() - 13);
 }
 
-std::pair <std::string, int> Tile::update(float time)
+std::pair <std::string, int> Tile::update(int elapsedHours)
 {
-	m_produced += time * (m_factoryOutput / m_productionCost);
+	m_produced += elapsedHours * (m_factoryOutput / m_productionCost);
 	int latestBatch = int(m_produced) - m_producedBefore;
 	m_producedBefore = int(m_produced);
-	m_storage[m_inProduction] += latestBatch;
+	if (m_inProduction != "ConstructionPoints") {
+		m_storage[m_inProduction] += latestBatch;
+	}
 	std::pair<std::string, int> result = make_pair(m_inProduction, latestBatch);
 	return result;
 }
@@ -84,8 +93,40 @@ void Tile::drawItselfOnProduction(sf::RenderWindow & window, sf::View & view)
 	}
 }
 
+void Tile::drawItselfOnLogistics(sf::RenderWindow & window, sf::View & view)
+{
+	window.setView(view);
+	sf::Text text;
+	text.setFont(Renderer::font);
+	text.setCharacterSize(15);
+	text.setFillColor(sf::Color::Black);
+	int i = 0;
+	for (auto& equipment : m_storage) {
+		m_equipmentBackground.setPosition(sf::Vector2f(10 , 10 + i * 35));
+		text.setPosition(sf::Vector2f(12, 10 + i * 35 + 5));
+		text.setString(equipment.first + " " + std::to_string(equipment.second));
+		window.draw(m_equipmentBackground);
+		window.draw(text);
+		i++;
+	}
+	if (m_selectedEquipment != "None") {
+		text.setPosition(200, 10);
+		m_equipmentBackground.setPosition(sf::Vector2f(200, 10));
+		text.setString(m_selectedEquipment);
+		m_equipmentNumSelector.setValues(0, m_storage[m_selectedEquipment], m_equipmentNumSelected);
+		window.draw(m_equipmentBackground);
+		window.draw(text);
+		m_equipmentNumSelector.drawItself(window, view);
+	}
+}
+
 
 sf::Sprite & Tile::getBeingProduced()
 {
 	return m_beingProduced;
+}
+
+void Tile::initializeTransportable()
+{
+	m_inLoadingBay = TransportablePointer(m_selectedEquipment, m_equipmentNumSelected, std::stoi(m_priorityGetter.getString()), 500, m_playerNum);
 }

@@ -3,8 +3,8 @@
 
 class Writable : public GUI_Drawable{
 public:
-	Writable(sf::Vector2f size, sf::Vector2f pos);
-	Writable(sf::Vector2f pos);
+	Writable(sf::Vector2f size, sf::Vector2f pos, const sf::Font& font);
+	Writable(sf::Vector2f pos, const sf::Font& font);
 	void addCharacter(char input);
 	void addNumber(char input);
 	std::string getString()const;

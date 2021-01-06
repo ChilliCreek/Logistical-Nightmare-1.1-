@@ -1,12 +1,11 @@
 #pragma once
 #include<iomanip>
 #include<sstream>
-#include<iostream>
 #include"GUI_Drawable.h"
 
 class Adjustable : public GUI_Drawable{
 public:
-	Adjustable(sf::Vector2f pos, float minVal, float maxVal, float size, const std::string& labelString, float defaultVal);
+	Adjustable(sf::Vector2f pos, float minVal, float maxVal, float size, const std::string& labelString, float defaultVal, const sf::Font& font);
 	static std::string floatToString(float val, float precision);
 	void drawItself(sf::RenderWindow& window, sf::View& view);
 	void setMovablePosition(sf::Vector2f mousePos);
@@ -24,6 +23,7 @@ public:
 		return circleContains(m_movable, point);
 	}
 	float getVal();
+	void setValues(float minVal, float maxVal, float defaultVal);
 private:
 	float m_size;
 	bool m_clickedOrNot = false;
