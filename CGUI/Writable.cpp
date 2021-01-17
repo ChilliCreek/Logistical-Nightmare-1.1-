@@ -4,7 +4,7 @@
 Writable::Writable(sf::Vector2f size, sf::Vector2f pos, const sf::Font& font) : m_textField(size)
 {
 	m_string.setFont(font);
-	m_string.setCharacterSize(25);
+	m_string.setCharacterSize(size.y - 5);
 	m_string.setFillColor(sf::Color::White);
 	m_string.setPosition(pos);
 	m_textField.setFillColor(sf::Color::Black);

@@ -23,7 +23,7 @@ void Allegiance::update(int elapsedHours, Tile*** tiles)
 {
 	for (auto& location : m_tilesLoc) {
 		if (tiles[location.x][location.y]->hasFactory()) {
-			std::pair <std::string, int> res = tiles[location.x][location.y]->update(elapsedHours);
+			std::pair <std::string, int> res = tiles[location.x][location.y]->produce(elapsedHours);
 			if (res.first == "ConstructionPoints") {
 				m_constructionPoints += res.second;
 			}
@@ -31,6 +31,7 @@ void Allegiance::update(int elapsedHours, Tile*** tiles)
 				m_equipmentStorage[res.first] += res.second;
 			}
 		}
+		tiles[location.x][location.y]->update(tiles, elapsedHours);
 	}
 }
 

@@ -11,7 +11,7 @@ public:
 	inline bool isClicked()const {
 		return m_clickedOrNot;
 	}
-	inline bool setClickedTrue(sf::Vector2f pos)
+	inline bool setClicked(sf::Vector2f pos)
 	{
 		if (m_textField.getGlobalBounds().contains(pos)) {
 			m_clickedOrNot = true;

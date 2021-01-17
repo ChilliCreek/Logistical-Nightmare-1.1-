@@ -114,9 +114,10 @@ void Renderer::drawToWindow(sf::RenderWindow& window, std::vector<sf::View>& vie
 	case e_tab::PRODUCTION:
 		drawProductionToWindow(window, views, tiles, tabs);
 		break;
+	case e_tab::LOGISTICS_SEND:
 	case e_tab::LOGISTICS:
 		drawMapToWindow(window, views[static_cast<int>(e_views::MAP)], tiles);
-		drawLogisticsToWindow(window, views, tiles);
+		drawLogisticsToWindow(window, views, tabs, tiles);
 		break;
 	case e_tab::BUILDING:
 		break;
@@ -179,17 +180,36 @@ void Renderer::drawResearchRightToWindow(sf::RenderWindow& window, std::vector<s
 	}
 }
 
-void Renderer::drawLogisticsToWindow(sf::RenderWindow & window, std::vector<sf::View>& views, Tile*** tiles)
+void Renderer::drawLogisticsToWindow(sf::RenderWindow & window, std::vector<sf::View>& views, e_tab& tabs, Tile*** tiles)
 {
-	if (selectedLogisticsTile.x != -1) {
+	if (tabs == e_tab::LOGISTICS) {
+		if (selectedLogisticsTile.x != -1) {
+			window.setView(views[static_cast<int>(e_views::LOGISTICS)]);
+			window.draw(optionsBackground);
+			exitButton.setPosition(0, 0);
+			window.draw(exitButton);
+			tiles[selectedLogisticsTile.x][selectedLogisticsTile.y]->drawItselfOnLogistics(window, views[static_cast<int>(e_views::LOGISTICS)]);
+			if (tiles[selectedLogisticsTile.x][selectedLogisticsTile.y]->getSelectedEquipment() != "None") {
+				window.draw(sendButtonBackground);
+				window.draw(sendButton);
+			}
+		}
+	}
+	else if(tabs == e_tab::LOGISTICS_SEND){
 		window.setView(views[static_cast<int>(e_views::LOGISTICS)]);
-		window.draw(optionsBackground);
-		exitButton.setPosition(0, 0);
-		window.draw(exitButton);
-		tiles[selectedLogisticsTile.x][selectedLogisticsTile.y]->drawItselfOnLogistics(window, views[static_cast<int>(e_views::LOGISTICS)]);
-		if (tiles[selectedLogisticsTile.x][selectedLogisticsTile.y]->getSelectedEquipment() != "None") {
-			window.draw(sendButtonBackground);
-			window.draw(sendButton);
+		auto tilePaths = tiles[selectedLogisticsTile.x][selectedLogisticsTile.y]->getTransPInLoadingBay().pt->getPaths();
+		sf::RectangleShape arrows; sf::RectangleShape outline;
+		outline.setPosition(selectedLogisticsTile.x * TILE_SIZE, selectedLogisticsTile.y * TILE_SIZE);
+		outline.setFillColor(sf::Color(0, 0, 0, 0));
+		outline.setOutlineColor(sf::Color::Blue);
+		outline.setOutlineThickness(-5);
+		window.draw(outline);
+		arrows.setFillColor(sf::Color::Black);
+		for (auto const& [prev, path] : tilePaths) {
+			arrows.setRotation(std::atan2f(prev.y - path.y, prev.x - path.x));
+			arrows.setPosition(prev.x * TILE_SIZE, prev.y * TILE_SIZE);
+			arrows.setSize(sf::Vector2f(distanceBetween2DPoints(prev.x * TILE_SIZE, prev.y * TILE_SIZE, path.x * TILE_SIZE, path.y * TILE_SIZE), 5));
+			window.draw(arrows);
 		}
 	}
 }
@@ -204,7 +224,7 @@ void Renderer::drawResearchLeftToWindow(sf::RenderWindow& window, std::vector<sf
 		if (res.prevResearchVectorLocation != -1) {
 			arrow.setSize(sf::Vector2f(distanceBetween2DPoints(allResearch[res.prevResearchVectorLocation].getEquipmentBackground().getGlobalBounds().left, allResearch[res.prevResearchVectorLocation].getEquipmentBackground().getGlobalBounds().top, res.getEquipmentBackground().getGlobalBounds().left, res.getEquipmentBackground().getGlobalBounds().top), 5.f));
 			arrow.setPosition(res.getEquipmentBackground().getGlobalBounds().left + res.getEquipmentBackground().getGlobalBounds().width / 2, res.getEquipmentBackground().getGlobalBounds().top + res.getEquipmentBackground().getGlobalBounds().height / 2);
-			arrow.setRotation(90 - std::atan2f(allResearch[res.prevResearchVectorLocation].getEquipmentBackground().getGlobalBounds().left - res.getEquipmentBackground().getGlobalBounds().left, allResearch[res.prevResearchVectorLocation].getEquipmentBackground().getGlobalBounds().top - res.getEquipmentBackground().getGlobalBounds().top) * 180 / PI);
+			arrow.setRotation(std::atan2f(allResearch[res.prevResearchVectorLocation].getEquipmentBackground().getGlobalBounds().top - res.getEquipmentBackground().getGlobalBounds().top, allResearch[res.prevResearchVectorLocation].getEquipmentBackground().getGlobalBounds().left - res.getEquipmentBackground().getGlobalBounds().left) * 180 / PI);
 			window.draw(arrow);
 		}
 	}
@@ -273,75 +293,75 @@ std::string Renderer::hoursToDateAndTime(int hours)
 	while (addedOne) {
 		switch (month) {
 		case 1:
-			addedOne = (days > 31.f);
-			days = addedOne ? (days - 31.f) : days;
+			addedOne = (days > 31);
+			days = addedOne ? (days - 31) : days;
 			month = addedOne ? (month + 1) : month;
 			break;
 		case 2:
 			if (year % 4 == 0) {
-				addedOne = (days > 29.f);
-				days = addedOne ? (days - 29.f) : days;
+				addedOne = (days > 29);
+				days = addedOne ? (days - 29) : days;
 				month = addedOne ? (month + 1) : month;
 				break;
 			}
 			else {
-				addedOne = (days > 28.f);
-				days = addedOne ? (days - 28.f) : days;
+				addedOne = (days > 28);
+				days = addedOne ? (days - 28) : days;
 				month = addedOne ? (month + 1) : month;
 				break;
 			}
 		case 3:
-			addedOne = (days > 31.f);
-			days = addedOne ? (days - 31.f) : days;
+			addedOne = (days > 31);
+			days = addedOne ? (days - 31) : days;
 			month = addedOne ? (month + 1) : month;
 			break;
 		case 4:
-			addedOne = (days > 30.f);
-			days = addedOne ? (days - 30.f) : days;
+			addedOne = (days > 30);
+			days = addedOne ? (days - 30) : days;
 			month = addedOne ? (month + 1) : month;
 			break;
 		case 5:
-			addedOne = (days > 31.f);
-			days = addedOne ? (days - 31.f) : days;
+			addedOne = (days > 31);
+			days = addedOne ? (days - 31) : days;
 			month = addedOne ? (month + 1) : month;
 			break;
 		case 6:
-			addedOne = (days > 30.f);
-			days = addedOne ? (days - 30.f) : days;
+			addedOne = (days > 30);
+			days = addedOne ? (days - 30) : days;
 			month = addedOne ? (month + 1) : month;
 			break;
 		case 7:
-			addedOne = (days > 31.f);
-			days = addedOne ? (days - 31.f) : days;
+			addedOne = (days > 31);
+			days = addedOne ? (days - 31) : days;
 			month = addedOne ? (month + 1) : month;
 			break;
 		case 8:
-			addedOne = (days > 31.f);
-			days = addedOne ? (days - 31.f) : days;
+			addedOne = (days > 31);
+			days = addedOne ? (days - 31) : days;
 			month = addedOne ? (month + 1) : month;
 			break;
 		case 9:
-			addedOne = (days > 30.f);
-			days = addedOne ? (days - 30.f) : days;
+			addedOne = (days > 30);
+			days = addedOne ? (days - 30) : days;
 			month = addedOne ? (month + 1) : month;
 			break;
 		case 10:
-			addedOne = (days > 31.f);
-			days = addedOne ? (days - 31.f) : days;
+			addedOne = (days > 31);
+			days = addedOne ? (days - 31) : days;
 			month = addedOne ? (month + 1) : month;
 			break;
 		case 11:
-			addedOne = (days > 30.f);
-			days = addedOne ? (days - 30.f) : days;
+			addedOne = (days > 30);
+			days = addedOne ? (days - 30) : days;
 			month = addedOne ? (month + 1) : month;
 			break;
 		case 12:
-			addedOne = (days > 31.f);
-			days = addedOne ? (days - 31.f) : days;
+			addedOne = (days > 31);
+			days = addedOne ? (days - 31) : days;
 			month = addedOne ? (month + 1) : month;
 			break;
 		}
 	}
-	ss << monthStrings[month - 1] << " " << days + 1 << " " << (year + 1940) << "  " << hours << ":00";
+	ss << monthStrings[month - 1] << " " << days << " " << (year + 1940) << "  " << hours << ":00";
 	return ss.str();
 }

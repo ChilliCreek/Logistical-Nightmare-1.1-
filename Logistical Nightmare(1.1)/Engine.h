@@ -7,7 +7,8 @@
 #include"Tile.h"
 #include"TextureHolder.h"
 #include"Researchable.h"
-
+#include<chrono>
+#include<thread>
 //To make code in Engine class less, created Renderer class to separate the draw/render part of the Engine. Engine is-a Renderer.
 class Engine : public Renderer
 {
@@ -28,7 +29,7 @@ private:
 	void hudInput(sf::Vector2f, e_tab&);
 	void researchInput(sf::RenderWindow& window, std::vector<sf::View>& views, sf::Vector2i mouseLocalPosition);
 	void productionInput(sf::RenderWindow& window, std::vector<sf::View>& views, sf::Vector2i mouseLocalPosition, e_tab& tabStatus, Tile*** tiles);
-	void logisticsInput(sf::RenderWindow& window, std::vector<sf::View>& views, sf::Vector2i mouseLocalPosition, Tile*** tiles, e_tab tabStatus);
+	void logisticsInput(sf::RenderWindow& window, std::vector<sf::View>& views, sf::Vector2i mouseLocalPosition, Tile*** tiles, e_tab& tabStatus, sf::Event& event);
 	void optionsInput(sf::Vector2f mouseGlobalPos);
 	void zoom(sf::View& mapView, float scrollDelta, float& zoomFactor);
 	void cameraMover(sf::View& view, sf::Vector2f boundsMax, sf::Vector2f boundsMin);

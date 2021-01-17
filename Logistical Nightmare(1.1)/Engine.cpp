@@ -56,7 +56,7 @@ void Engine::equipmentStatSetter()
 	allResearch.emplace_back("graphics/ConstructionPoints.png", 0.f, 80.f, 2.f, 200.f, 80.f, sf::Vector2f(700, 100), 10, -1);
 }
 
-int Engine::handleTime(int& hours, float sec)
+int Engine::handleTime(int&hours, float sec)
 {
 	static float deltaTime = 0;
 	deltaTime += sec;
@@ -100,16 +100,18 @@ void Engine::input(sf::RenderWindow& window, std::vector<sf::View>& views, sf::V
 						productionInput(window, views, screenPosition, tabStatus, tiles);
 					}
 					else if (tabStatus == e_tab::LOGISTICS) {
-						logisticsInput(window, views, screenPosition, tiles, tabStatus);
+						logisticsInput(window, views, screenPosition, tiles, tabStatus, event);
 					}
 					else if (tabStatus == e_tab::OPTIONS) {
 						optionsInput(window.mapPixelToCoords(screenPosition, views[static_cast<int>(e_views::OPTIONS)]));
 					}
+				}
 				else if (event.mouseButton.button == sf::Mouse::Right) {
-					if (tabStatus == e_tab::UNITS) {
+					if (tabStatus == e_tab::LOGISTICS_SEND) {
+						logisticsInput(window, views, screenPosition, tiles, tabStatus, event);
 					}
 				}
-				break; }
+				break; 
 			case sf::Event::MouseButtonReleased:
 				if (event.mouseButton.button == sf::Mouse::Left) {
 					if (tabStatus == e_tab::OPTIONS) {
@@ -132,6 +134,9 @@ void Engine::input(sf::RenderWindow& window, std::vector<sf::View>& views, sf::V
 				}
 				break;
 			case sf::Event::TextEntered:
+				if (tabStatus == e_tab::LOGISTICS) {
+					logisticsInput(window, views, screenPosition, tiles, tabStatus, event);
+				}
 				break;
 		}
 	}
@@ -154,7 +159,7 @@ void Engine::input(sf::RenderWindow& window, std::vector<sf::View>& views, sf::V
 		if (selectedLogisticsTile.x == -1) {
 			cameraMover(mapView, sf::Vector2f(mapSize.x, mapSize.y), sf::Vector2f(0, 0));
 		}
-		else if(tiles[selectedLogisticsTile.x][selectedLogisticsTile.y]->getAdjustable().isClicked()){
+		else if(tiles[selectedLogisticsTile.x][selectedLogisticsTile.y]->getSelectedEquipment() != "None" && tiles[selectedLogisticsTile.x][selectedLogisticsTile.y]->getAdjustable().isClicked()){
 			tiles[selectedLogisticsTile.x][selectedLogisticsTile.y]->getAdjustable().setMovablePosition(window.mapPixelToCoords(screenPosition, views[static_cast<int>(e_views::LOGISTICS)]));
 			tiles[selectedLogisticsTile.x][selectedLogisticsTile.y]->setEquipmentNumSelected(int(tiles[selectedLogisticsTile.x][selectedLogisticsTile.y]->getAdjustable().getVal()));
 		}
@@ -239,7 +244,7 @@ void Engine::productionInput(sf::RenderWindow & window, std::vector<sf::View>& v
 	if (tabStatus == e_tab::PRODUCTION) {
 		sf::Vector2f mouseProductionPosition = window.mapPixelToCoords(mouseLocalPosition, views[static_cast<int>(e_views::PRODUCTION)]);
 		if (mouseProductionPosition.x >= 0 && mouseProductionPosition.x < mapSize.x && mouseProductionPosition.y >= 0 && mouseProductionPosition.y < mapSize.y) {
-			productionSelectedTile = sf::Vector2i(static_cast<int>(mouseProductionPosition.y / TILE_SIZE), static_cast<int>(mouseProductionPosition.x / TILE_SIZE));
+			productionSelectedTile = withinMapBounds(sf::Vector2i(static_cast<int>(mouseProductionPosition.y / TILE_SIZE), static_cast<int>(mouseProductionPosition.x / TILE_SIZE)));
 			if (tiles[productionSelectedTile.x][productionSelectedTile.y]->hasFactory()) {
 				tabStatus = e_tab::PRODUCTION_CLICKED;
 				views[static_cast<int>(e_views::PRODUCTION)].setCenter(TILE_SIZE * (productionSelectedTile.y + 0.5f), TILE_SIZE * (productionSelectedTile.x + 0.5f));
@@ -276,20 +281,21 @@ void Engine::productionInput(sf::RenderWindow & window, std::vector<sf::View>& v
 	}
 }
 
-void Engine::logisticsInput(sf::RenderWindow & window, std::vector<sf::View>& views, sf::Vector2i mouseLocalPosition, Tile*** tiles, e_tab tabStatus)
+void Engine::logisticsInput(sf::RenderWindow & window, std::vector<sf::View>& views, sf::Vector2i mouseLocalPosition, Tile*** tiles, e_tab& tabStatus, sf::Event& event)
 {
-	if (tabStatus == e_tab::LOGISTICS) {
+	if (tabStatus == e_tab::LOGISTICS && event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left) {
 		//If a tile is not currently selected in the Logistics tab, select a tab.
 		if (selectedLogisticsTile.x == -1) {
 			sf::Vector2f mouseMapPosition = window.mapPixelToCoords(mouseLocalPosition, views[static_cast<int>(e_views::MAP)]);
-			selectedLogisticsTile = sf::Vector2i(static_cast<int>(mouseMapPosition.y / TILE_SIZE), static_cast<int>(mouseMapPosition.x / TILE_SIZE));
+			selectedLogisticsTile = withinMapBounds(sf::Vector2i(static_cast<int>(mouseMapPosition.y / TILE_SIZE), static_cast<int>(mouseMapPosition.x / TILE_SIZE)));
 		}
 		//If a tile is already selected then the equipment minitab is open.
 		else {
 			sf::Vector2f mouseLogisticsPosition = window.mapPixelToCoords(mouseLocalPosition, views[static_cast<int>(e_views::LOGISTICS)]);
+			//If an equipment is being seelcted to be sent
 			if (mouseLogisticsPosition.x > 10 && mouseLogisticsPosition.x < 160) {
 				std::unordered_map <std::string, int>& storage = tiles[selectedLogisticsTile.x][selectedLogisticsTile.y]->getStorage();
-				//If any of the equipemtn is chosen.
+				//If any of the equipement is chosen.
 				if (mouseLogisticsPosition.y > 10 && mouseLogisticsPosition.y < storage.size() * 35 + 5) {
 					if (fmod(mouseLogisticsPosition.y - 10, 35) < 30.f) {
 						int i = 0;
@@ -315,8 +321,9 @@ void Engine::logisticsInput(sf::RenderWindow & window, std::vector<sf::View>& vi
 				}
 				//Send the equipment currently chosen with the user set amount and priority.
 				else if (sendButtonBackground.getGlobalBounds().contains(mouseLogisticsPosition)) {
-					tabStatus = e_tab::LOGISTICS_SEND;
-					tiles[selectedLogisticsTile.x][selectedLogisticsTile.y]->initializeTransportable();
+					if (tiles[selectedLogisticsTile.x][selectedLogisticsTile.y]->initializeTransportable()) {
+						tabStatus = e_tab::LOGISTICS_SEND;
+					}
 				}
 				//Set the amount of equipment to send+
 				else if (tempAdj.movableContains(mouseLogisticsPosition)) {
@@ -324,11 +331,28 @@ void Engine::logisticsInput(sf::RenderWindow & window, std::vector<sf::View>& vi
 						tempAdj.setClickedOrNot(true, mouseLogisticsPosition);
 					}
 				}
+				else if (selectedLogisticsTile.x != -1) {
+					Writable& priorityGetter = tiles[selectedLogisticsTile.x][selectedLogisticsTile.y]->getPriorityGetter();
+					priorityGetter.setClicked(mouseLogisticsPosition);
+				}
 			}
 		}
 	}
-	else {
-
+	else if(tabStatus == e_tab::LOGISTICS_SEND && event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Right){
+		sf::Vector2f mouseMapPosition = window.mapPixelToCoords(mouseLocalPosition, views[static_cast<int>(e_views::MAP)]);
+		sf::Vector2i toSend = withinMapBounds(sf::Vector2i(static_cast<int>(mouseMapPosition.y / TILE_SIZE), static_cast<int>(mouseMapPosition.x / TILE_SIZE)));
+		if (toSend.x > -1) {
+			tiles[selectedLogisticsTile.x][selectedLogisticsTile.y]->addPathToTPinLoadingBay(toSend);
+			tiles[selectedLogisticsTile.x][selectedLogisticsTile.y]->launchTransportable();
+		}
+		tabStatus = e_tab::LOGISTICS;
+		selectedLogisticsTile.x = -1;
+	}
+	else if (selectedLogisticsTile.x != -1 && event.type == sf::Event::TextEntered) {
+		Writable& priorityGetter = tiles[selectedLogisticsTile.x][selectedLogisticsTile.y]->getPriorityGetter();
+		if (priorityGetter.isClicked()) {
+			priorityGetter.addNumber(event.text.unicode);
+		}
 	}
 }
 
@@ -394,7 +418,7 @@ void Engine::run()
 	//Creating the window
 	sf::VideoMode vm(resolution.x, resolution.y);
 	sf::RenderWindow window(vm, "Logistical Nightmare", sf::Style::Fullscreen);
-	window.setFramerateLimit(90);
+	window.setFramerateLimit(60);
 
 	//Views (don't mess with the push_back order)
 	std::vector<sf::View> views;
@@ -434,14 +458,20 @@ void Engine::run()
 	equipmentStatSetter();
 
 	//Runtime clock
-	sf::Clock clock; int newHours;
+	sf::Clock clock; 
+	int newHours;
+	float deltaTime;
 
 	while (window.isOpen()) {
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Escape)) {
 			window.close();
 		}
 		else {
-			newHours = handleTime(hours, clock.restart().asSeconds());
+			deltaTime = clock.restart().asSeconds();
+			if (deltaTime < 0.01) {
+				std::this_thread::sleep_for(std::chrono::microseconds(static_cast<int>((0.01 - deltaTime) * 100000)));
+			}
+			newHours = handleTime(hours, deltaTime + clock.restart().asSeconds());
 			//updating the tiles and the two sides-allegiances
 			for (int i = 0; i < 2; i++) {
 				if(newHours > 0)allegiances[i].update(newHours, tiles);
@@ -453,11 +483,9 @@ void Engine::run()
 			allegianceText1.setString(allegiances[0].getName() + " CP: " + std::to_string(static_cast<int>(allegiances[0].getConstructionPoints())));
 			allegianceText2.setString(allegiances[1].getName() + " CP: " + std::to_string(static_cast<int>(allegiances[1].getConstructionPoints())));
 			input(window, views, resolution, tabStatus, tiles);
-			if (newHours > 0) {
-				drawToWindow(window, views, tabStatus, tiles);
-				window.display();
-				window.clear();
-			}
+			drawToWindow(window, views, tabStatus, tiles);
+			window.display();
+			window.clear();
 		}
 	}
 	for (int i = 0; i < tilesNums.x; i++) {

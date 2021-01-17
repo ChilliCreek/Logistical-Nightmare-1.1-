@@ -53,3 +53,10 @@ inline sf::Vector2i nextTileDirection(float angle) {
 		return sf::Vector2i(0, -1);
 	}
 }
+
+//comparator for transport map
+struct SFVector2iComp {
+	bool operator()(const sf::Vector2i& left, const sf::Vector2i& right) const{
+		return (left.x < right.x) || (left.x == right.x && left.y < right.y);
+	}
+};

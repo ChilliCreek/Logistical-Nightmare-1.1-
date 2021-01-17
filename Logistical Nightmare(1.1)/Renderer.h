@@ -10,8 +10,8 @@
 #include"Writable.h"
 #include "Functions.h"
 
-constexpr float PI = 3.141592;
-constexpr float TIME_RATIO = 1 / 2.43333333;
+constexpr float PI = 3.141592f;
+constexpr float TIME_RATIO = 1.f / 2.43333333f;
 
 
 enum class e_tab { UNITS, RESEARCH, PRODUCTION, PRODUCTION_CLICKED, LOGISTICS, LOGISTICS_SEND, BUILDING, OPTIONS};
@@ -35,11 +35,19 @@ public:
 	void drawMapToWindow(sf::RenderWindow& window, sf::View& mapView, Tile*** tiles);
 	void drawResearchLeftToWindow(sf::RenderWindow& window, std::vector<sf::View>& views);
 	void drawResearchRightToWindow(sf::RenderWindow& window, std::vector<sf::View>& views);
-	void drawLogisticsToWindow(sf::RenderWindow& window, std::vector<sf::View>& views, Tile*** tiles);
+	void drawLogisticsToWindow(sf::RenderWindow& window, std::vector<sf::View>& views, e_tab& tabs, Tile*** tiles);
 	// TODO
 	void drawOptionsToWindow(sf::RenderWindow& window, sf::View& optionsView);
 	void drawProductionToWindow(sf::RenderWindow& window, std::vector<sf::View>& views, Tile*** tiles, e_tab& tabs);
 	static std::string hoursToDateAndTime(int hours);
+	inline sf::Vector2i withinMapBounds(sf::Vector2i inp) {
+		if (inp.x >= 0 && inp.x < tilesNums.x && inp.y >= 0 && inp.y < tilesNums.y) {
+			return inp;
+		}
+		else {
+			return sf::Vector2i(-1, -1);
+		}
+	}
 protected:
 	sf::Vector2i selectedLogisticsTile;
 	sf::Vector2i tilesNums;
@@ -68,5 +76,5 @@ protected:
 	TextureHolder textureHolder;
 	sf::Sprite speedButtons;
 	sf::Sprite tabButtons[6];
-	int hours = 0;
+	int hours = 4152;
 };

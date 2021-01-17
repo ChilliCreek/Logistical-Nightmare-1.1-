@@ -2,7 +2,7 @@
 #include"Tile.h"
 #include"Renderer.h"
 #include<iostream>
-Tile::Tile(int terrain, sf::Vector2i pos, int playerNum) : m_equipmentNumSelector(sf::Vector2f(200, 50), 0, 0, 120.f, "To send:", 0, Renderer::font), m_playerNum(playerNum), m_priorityGetter(sf::Vector2f(300, 50), Renderer::font)
+Tile::Tile(int terrain, sf::Vector2i pos, int playerNum) : m_tileNum(pos), m_equipmentNumSelector(sf::Vector2f(200, 50), 0, 0, 120.f, "To send:", 0, Renderer::font), m_playerNum(playerNum), m_priorityGetter(sf::Vector2f(20, 30), sf::Vector2f(300, 100), Renderer::font)
 {
 	m_beingProduced.setPosition(Renderer::TILE_SIZE * pos.y, Renderer::TILE_SIZE * pos.x + Renderer::TILE_SIZE / 2);
 	m_beingProduced.setScale(0.25f, 0.25f);
@@ -31,6 +31,7 @@ Tile::Tile(int terrain, sf::Vector2i pos, int playerNum) : m_equipmentNumSelecto
 	m_hasFactory = false;
 	m_inProduction = "ConstructionPoints";
 
+	m_inLoadingBay = nullptr;
 }
 
 bool Tile::hasFactory() const
@@ -51,7 +52,7 @@ void Tile::setEquipmentInProduction(const std::string& equipmentName, float prod
 	m_inProduction = equipmentName.substr(9, equipmentName.length() - 13);
 }
 
-std::pair <std::string, int> Tile::update(int elapsedHours)
+std::pair <std::string, int> Tile::produce(int elapsedHours)
 {
 	m_produced += elapsedHours * (m_factoryOutput / m_productionCost);
 	int latestBatch = int(m_produced) - m_producedBefore;
@@ -61,6 +62,35 @@ std::pair <std::string, int> Tile::update(int elapsedHours)
 	}
 	std::pair<std::string, int> result = make_pair(m_inProduction, latestBatch);
 	return result;
+}
+
+void Tile::update(Tile*** tiles, int elapsedHours)
+{
+	m_transportCapacityInWeight = elapsedHours * DEFAULT_TRANSPORT_CAPACITY_IN_WEIGHT;
+	sf::Vector2i theTileToSend;
+	int numSent;
+
+	while (!sender.empty() && m_transportCapacityInWeight > 0) {
+		try {
+			theTileToSend = sender.top().pt->getNextTile(m_tileNum);
+			numSent = sender.top().pt->update(m_transportCapacityInWeight, m_tileNum);
+			m_transportCapacityInWeight -= numSent;
+			tiles[theTileToSend.x][theTileToSend.y]->addTransportableToSender(sender.top());
+		}
+		catch (const std::invalid_argument&) {
+			numSent = sender.top().pt->updateNoNextTile(m_transportCapacityInWeight, m_tileNum);
+			if (m_storage.find(sender.top().pt->getName()) != m_storage.end()) {
+				m_storage[sender.top().pt->getName()] += numSent;
+			}
+			else {
+				m_storage[sender.top().pt->getName()] = numSent;
+			}
+			m_transportCapacityInWeight -= numSent;
+		}
+		if (sender.top().pt->finished(m_tileNum)) {
+			sender.pop();
+		}
+	}
 }
 
 std::string Tile::terrainNumToString(int terrain)
@@ -115,6 +145,7 @@ void Tile::drawItselfOnLogistics(sf::RenderWindow & window, sf::View & view)
 		text.setString(m_selectedEquipment);
 		m_equipmentNumSelector.setValues(0, m_storage[m_selectedEquipment], m_equipmentNumSelected);
 		window.draw(m_equipmentBackground);
+		m_priorityGetter.drawItself(window, view);
 		window.draw(text);
 		m_equipmentNumSelector.drawItself(window, view);
 	}
@@ -126,7 +157,22 @@ sf::Sprite & Tile::getBeingProduced()
 	return m_beingProduced;
 }
 
-void Tile::initializeTransportable()
+bool Tile::initializeTransportable()
 {
-	m_inLoadingBay = TransportablePointer(m_selectedEquipment, m_equipmentNumSelected, std::stoi(m_priorityGetter.getString()), 500, m_playerNum);
+	if (m_priorityGetter.getString() != "") {
+		m_inLoadingBay = new TransportablePointer(m_selectedEquipment, m_equipmentNumSelected, std::stoi(m_priorityGetter.getString()), 1, m_playerNum);
+		return true;
+	}
+	else {
+		m_inLoadingBay = nullptr;
+		return false;
+	}
+}
+
+void Tile::launchTransportable()
+{
+	sender.push(*m_inLoadingBay);
+	m_storage[m_selectedEquipment] -= m_equipmentNumSelected;
+	m_equipmentNumSelector.setValues(0, m_storage[m_selectedEquipment], 0);
+	delete m_inLoadingBay;
 }
