@@ -67,22 +67,22 @@ int Engine::handleTime(int&hours, float sec)
 }
 
 //the general input method that runs every frame
-void Engine::input(sf::RenderWindow& window, std::vector<sf::View>& views, sf::Vector2f resolution, e_tab& tabStatus, Tile*** tiles)
+void Engine::input(sf::RenderWindow& window, std::vector<std::shared_ptr<sf::View>>& views, sf::Vector2f resolution, e_tab& tabStatus, Tile*** tiles)
 {
 	//To make the code more readable
-	sf::View& mapView = views[static_cast<int>(e_views::MAP)];
-	sf::View& hudView = views[static_cast<int>(e_views::HUD)];
-	sf::View& resViewRight = views[static_cast<int>(e_views::RESEARCH_RIGHT)];
+	sf::View& mapView = *views[e_views::MAP];
+	sf::View& hudView = *views[e_views::HUD];
+	sf::View& resViewRight = *views[e_views::RESEARCH_RIGHT];
 	sf::Vector2i screenPosition = sf::Mouse::getPosition(window);
 	while (window.pollEvent(event)) {
 		switch (event.type) 
 		{   
 		    case sf::Event::MouseWheelScrolled:
 				if (tabStatus == e_tab::UNITS || (tabStatus == e_tab::LOGISTICS && selectedLogisticsTile.x == -1)) {
-					zoom(mapView, event.mouseWheelScroll.delta, Engine::ZOOM_FACTOR_MAP);
+					zoom(views[e_views::MAP], event.mouseWheelScroll.delta, Engine::ZOOM_FACTOR_MAP);
 				}
 				else if (tabStatus == e_tab::PRODUCTION || tabStatus == e_tab::PRODUCTION_CLICKED) {
-					zoom(views[static_cast<int>(e_views::PRODUCTION)], event.mouseWheelScroll.delta, Engine::ZOOM_FACTOR_PRODUCTION);
+					zoom(views[e_views::PRODUCTION], event.mouseWheelScroll.delta, Engine::ZOOM_FACTOR_PRODUCTION);
 				}
 				break;
 			case sf::Event::MouseButtonPressed:
@@ -103,7 +103,7 @@ void Engine::input(sf::RenderWindow& window, std::vector<sf::View>& views, sf::V
 						logisticsInput(window, views, screenPosition, tiles, tabStatus, event);
 					}
 					else if (tabStatus == e_tab::OPTIONS) {
-						optionsInput(window.mapPixelToCoords(screenPosition, views[static_cast<int>(e_views::OPTIONS)]));
+						optionsInput(window.mapPixelToCoords(screenPosition, *views[e_views::OPTIONS]));
 					}
 				}
 				else if (event.mouseButton.button == sf::Mouse::Right) {
@@ -116,17 +116,17 @@ void Engine::input(sf::RenderWindow& window, std::vector<sf::View>& views, sf::V
 				if (event.mouseButton.button == sf::Mouse::Left) {
 					if (tabStatus == e_tab::OPTIONS) {
 						if (zoomSensitivity.isClicked()) {
-							zoomSensitivity.setClickedOrNot(false, window.mapPixelToCoords(screenPosition, views[static_cast<int>(e_views::OPTIONS)]));
+							zoomSensitivity.setClickedOrNot(false, window.mapPixelToCoords(screenPosition, *views[e_views::OPTIONS]));
 						}
 						if (cameraSensitivity.isClicked()) {
-							cameraSensitivity.setClickedOrNot(false, window.mapPixelToCoords(screenPosition, views[static_cast<int>(e_views::OPTIONS)]));
+							cameraSensitivity.setClickedOrNot(false, window.mapPixelToCoords(screenPosition, *views[e_views::OPTIONS]));
 						}
 					}
 					else if (tabStatus == e_tab::LOGISTICS) {
 						if (selectedLogisticsTile.x != -1) {
 							if (tiles[selectedLogisticsTile.x][selectedLogisticsTile.y]->getSelectedEquipment() != "None") {
 								if (tiles[selectedLogisticsTile.x][selectedLogisticsTile.y]->getAdjustable().isClicked()) {
-									tiles[selectedLogisticsTile.x][selectedLogisticsTile.y]->getAdjustable().setClickedOrNot(false, window.mapPixelToCoords(screenPosition, views[static_cast<int>(e_views::LOGISTICS)]));
+									tiles[selectedLogisticsTile.x][selectedLogisticsTile.y]->getAdjustable().setClickedOrNot(false, window.mapPixelToCoords(screenPosition, *views[e_views::LOGISTICS]));
 								}
 							}
 						}
@@ -142,34 +142,34 @@ void Engine::input(sf::RenderWindow& window, std::vector<sf::View>& views, sf::V
 	}
 
 	if (tabStatus == e_tab::UNITS) {
-		cameraMover(mapView, sf::Vector2f(mapSize.x, mapSize.y), sf::Vector2f(0, 0));
+		cameraMover(views[e_views::MAP], sf::Vector2f(mapSize.x, mapSize.y), sf::Vector2f(0, 0));
 	}
 	else if (tabStatus == e_tab::PRODUCTION) {
-		cameraMover(views[static_cast<int>(e_views::PRODUCTION)], sf::Vector2f(mapSize.x, mapSize.y), sf::Vector2f(0, 0));
+		cameraMover(views[e_views::PRODUCTION], sf::Vector2f(mapSize.x, mapSize.y), sf::Vector2f(0, 0));
 	}
 	else if (tabStatus == e_tab::PRODUCTION_CLICKED) {
-		cameraMover(views[static_cast<int>(e_views::RESEARCH_LEFT)], sf::Vector2f(researchBackgroundLeft.getSize().x - resolution.x * 0.2f, researchBackgroundLeft.getSize().y - resolution.y * 0.45f), sf::Vector2f(resolution.x * 0.2f, resolution.y * 0.45f));
-		researchFrameLeft.setPosition(views[static_cast<int>(e_views::RESEARCH_LEFT)].getCenter());
+		cameraMover(views[e_views::RESEARCH_LEFT], sf::Vector2f(researchBackgroundLeft.getSize().x - resolution.x * 0.2f, researchBackgroundLeft.getSize().y - resolution.y * 0.45f), sf::Vector2f(resolution.x * 0.2f, resolution.y * 0.45f));
+		researchFrameLeft.setPosition(views[e_views::RESEARCH_LEFT]->getCenter());
 	}
 	else if (tabStatus == e_tab::RESEARCH) {
-		cameraMover(views[static_cast<int>(e_views::RESEARCH_LEFT)], sf::Vector2f(researchBackgroundLeft.getSize().x - resolution.x * 0.2f, researchBackgroundLeft.getSize().y - resolution.y * 0.45f), sf::Vector2f(resolution.x * 0.2f, resolution.y * 0.45f));
-		researchFrameLeft.setPosition(views[static_cast<int>(e_views::RESEARCH_LEFT)].getCenter());
+		cameraMover(views[e_views::RESEARCH_LEFT], sf::Vector2f(researchBackgroundLeft.getSize().x - resolution.x * 0.2f, researchBackgroundLeft.getSize().y - resolution.y * 0.45f), sf::Vector2f(resolution.x * 0.2f, resolution.y * 0.45f));
+		researchFrameLeft.setPosition(views[e_views::RESEARCH_LEFT]->getCenter());
 	}
 	else if (tabStatus == e_tab::LOGISTICS) {
 		if (selectedLogisticsTile.x == -1) {
-			cameraMover(mapView, sf::Vector2f(mapSize.x, mapSize.y), sf::Vector2f(0, 0));
+			cameraMover(views[e_views::MAP], sf::Vector2f(mapSize.x, mapSize.y), sf::Vector2f(0, 0));
 		}
 		else if(tiles[selectedLogisticsTile.x][selectedLogisticsTile.y]->getSelectedEquipment() != "None" && tiles[selectedLogisticsTile.x][selectedLogisticsTile.y]->getAdjustable().isClicked()){
-			tiles[selectedLogisticsTile.x][selectedLogisticsTile.y]->getAdjustable().setMovablePosition(window.mapPixelToCoords(screenPosition, views[static_cast<int>(e_views::LOGISTICS)]));
+			tiles[selectedLogisticsTile.x][selectedLogisticsTile.y]->getAdjustable().setMovablePosition(window.mapPixelToCoords(screenPosition, *views[e_views::LOGISTICS]));
 			tiles[selectedLogisticsTile.x][selectedLogisticsTile.y]->setEquipmentNumSelected(int(tiles[selectedLogisticsTile.x][selectedLogisticsTile.y]->getAdjustable().getVal()));
 		}
 	}
 	if (zoomSensitivity.isClicked()) {
-		zoomSensitivity.setMovablePosition(window.mapPixelToCoords(screenPosition, views[static_cast<int>(e_views::OPTIONS)]));
+		zoomSensitivity.setMovablePosition(window.mapPixelToCoords(screenPosition, *views[e_views::OPTIONS]));
 		ZOOM_SENSITIVITY = zoomSensitivity.getVal();
 	}
 	if (cameraSensitivity.isClicked()) {
-		cameraSensitivity.setMovablePosition(window.mapPixelToCoords(screenPosition, views[static_cast<int>(e_views::OPTIONS)]));
+		cameraSensitivity.setMovablePosition(window.mapPixelToCoords(screenPosition, *views[e_views::OPTIONS]));
 		CAMERA_SENSITIVITY = cameraSensitivity.getVal();
 	}
 }
@@ -227,9 +227,9 @@ void Engine::hudInput(sf::Vector2f mouseHudPos, e_tab& tab)
 	}
 }
 
-void Engine::researchInput(sf::RenderWindow& window, std::vector<sf::View>& views, sf::Vector2i mouseLocalPosition)
+void Engine::researchInput(sf::RenderWindow& window, std::vector<std::shared_ptr<sf::View>>& views, sf::Vector2i mouseLocalPosition)
 {
-	sf::Vector2f mouseGlobalPosition = window.mapPixelToCoords(mouseLocalPosition, views[static_cast<int>(e_views::RESEARCH_LEFT)]);
+	sf::Vector2f mouseGlobalPosition = window.mapPixelToCoords(mouseLocalPosition, *views[e_views::RESEARCH_LEFT]);
 	sf::FloatRect bounds;
 	for (auto& res : allResearch) {
 		bounds = res.getEquipmentBackground().getGlobalBounds();
@@ -239,15 +239,15 @@ void Engine::researchInput(sf::RenderWindow& window, std::vector<sf::View>& view
 	}
 }
 
-void Engine::productionInput(sf::RenderWindow & window, std::vector<sf::View>& views, sf::Vector2i mouseLocalPosition, e_tab& tabStatus, Tile*** tiles)
+void Engine::productionInput(sf::RenderWindow & window, std::vector<std::shared_ptr<sf::View>>& views, sf::Vector2i mouseLocalPosition, e_tab& tabStatus, Tile*** tiles)
 {
 	if (tabStatus == e_tab::PRODUCTION) {
-		sf::Vector2f mouseProductionPosition = window.mapPixelToCoords(mouseLocalPosition, views[static_cast<int>(e_views::PRODUCTION)]);
+		sf::Vector2f mouseProductionPosition = window.mapPixelToCoords(mouseLocalPosition, *views[e_views::PRODUCTION]);
 		if (mouseProductionPosition.x >= 0 && mouseProductionPosition.x < mapSize.x && mouseProductionPosition.y >= 0 && mouseProductionPosition.y < mapSize.y) {
 			productionSelectedTile = withinMapBounds(sf::Vector2i(static_cast<int>(mouseProductionPosition.y / TILE_SIZE), static_cast<int>(mouseProductionPosition.x / TILE_SIZE)));
 			if (tiles[productionSelectedTile.x][productionSelectedTile.y]->hasFactory()) {
 				tabStatus = e_tab::PRODUCTION_CLICKED;
-				views[static_cast<int>(e_views::PRODUCTION)].setCenter(TILE_SIZE * (productionSelectedTile.y + 0.5f), TILE_SIZE * (productionSelectedTile.x + 0.5f));
+				views[e_views::PRODUCTION]->setCenter(TILE_SIZE * (productionSelectedTile.y + 0.5f), TILE_SIZE * (productionSelectedTile.x + 0.5f));
 			}
 			else if (allegiances[playerNum].getConstructionPoints() > 400.f) {
 				tiles[productionSelectedTile.x][productionSelectedTile.y]->addFactory();
@@ -257,7 +257,7 @@ void Engine::productionInput(sf::RenderWindow & window, std::vector<sf::View>& v
 	}
 	else if (tabStatus == e_tab::PRODUCTION_CLICKED) {
 		if (mouseLocalPosition.x < (resolution.x * 0.4f)) {
-			sf::Vector2f mouseResPosition = window.mapPixelToCoords(mouseLocalPosition, views[static_cast<int>(e_views::RESEARCH_LEFT)]);
+			sf::Vector2f mouseResPosition = window.mapPixelToCoords(mouseLocalPosition, *views[e_views::RESEARCH_LEFT]);
 			sf::FloatRect bounds;
 			for (auto& res : allResearch) {
 				bounds = res.getEquipmentBackground().getGlobalBounds();
@@ -269,29 +269,29 @@ void Engine::productionInput(sf::RenderWindow & window, std::vector<sf::View>& v
 			}
 		}
 		else {
-			sf::Vector2f mouseProductionPosition = window.mapPixelToCoords(mouseLocalPosition, views[static_cast<int>(e_views::PRODUCTION)]);
+			sf::Vector2f mouseProductionPosition = window.mapPixelToCoords(mouseLocalPosition, *views[e_views::PRODUCTION]);
 			if (mouseProductionPosition.x >= 0 && mouseProductionPosition.x < mapSize.x && mouseProductionPosition.y >= 0 && mouseProductionPosition.y < mapSize.y) {
 				productionSelectedTile = sf::Vector2i(static_cast<int>(mouseProductionPosition.x / TILE_SIZE), static_cast<int>(mouseProductionPosition.y / TILE_SIZE));
 				if (tiles[productionSelectedTile.x][productionSelectedTile.y]->hasFactory()) {
 					tabStatus = e_tab::PRODUCTION_CLICKED;
-					views[static_cast<int>(e_views::PRODUCTION)].setCenter(TILE_SIZE * (productionSelectedTile.x + 0.5f), TILE_SIZE * (productionSelectedTile.y + 0.5f));
+					views[e_views::PRODUCTION]->setCenter(TILE_SIZE * (productionSelectedTile.x + 0.5f), TILE_SIZE * (productionSelectedTile.y + 0.5f));
 				}
 			}
 		}
 	}
 }
 
-void Engine::logisticsInput(sf::RenderWindow & window, std::vector<sf::View>& views, sf::Vector2i mouseLocalPosition, Tile*** tiles, e_tab& tabStatus, sf::Event& event)
+void Engine::logisticsInput(sf::RenderWindow & window, std::vector<std::shared_ptr<sf::View>>& views, sf::Vector2i mouseLocalPosition, Tile*** tiles, e_tab& tabStatus, sf::Event& event)
 {
 	if (tabStatus == e_tab::LOGISTICS && event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left) {
 		//If a tile is not currently selected in the Logistics tab, select a tab.
 		if (selectedLogisticsTile.x == -1) {
-			sf::Vector2f mouseMapPosition = window.mapPixelToCoords(mouseLocalPosition, views[static_cast<int>(e_views::MAP)]);
+			sf::Vector2f mouseMapPosition = window.mapPixelToCoords(mouseLocalPosition, *views[e_views::MAP]);
 			selectedLogisticsTile = withinMapBounds(sf::Vector2i(static_cast<int>(mouseMapPosition.y / TILE_SIZE), static_cast<int>(mouseMapPosition.x / TILE_SIZE)));
 		}
 		//If a tile is already selected then the equipment minitab is open.
 		else {
-			sf::Vector2f mouseLogisticsPosition = window.mapPixelToCoords(mouseLocalPosition, views[static_cast<int>(e_views::LOGISTICS)]);
+			sf::Vector2f mouseLogisticsPosition = window.mapPixelToCoords(mouseLocalPosition, *views[e_views::LOGISTICS]);
 			//If an equipment is being seelcted to be sent
 			if (mouseLogisticsPosition.x > 10 && mouseLogisticsPosition.x < 160) {
 				std::unordered_map <std::string, int>& storage = tiles[selectedLogisticsTile.x][selectedLogisticsTile.y]->getStorage();
@@ -339,7 +339,7 @@ void Engine::logisticsInput(sf::RenderWindow & window, std::vector<sf::View>& vi
 		}
 	}
 	else if(tabStatus == e_tab::LOGISTICS_SEND && event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Right){
-		sf::Vector2f mouseMapPosition = window.mapPixelToCoords(mouseLocalPosition, views[static_cast<int>(e_views::MAP)]);
+		sf::Vector2f mouseMapPosition = window.mapPixelToCoords(mouseLocalPosition, *views[e_views::MAP]);
 		sf::Vector2i toSend = withinMapBounds(sf::Vector2i(static_cast<int>(mouseMapPosition.y / TILE_SIZE), static_cast<int>(mouseMapPosition.x / TILE_SIZE)));
 		if (toSend.x > -1) {
 			tiles[selectedLogisticsTile.x][selectedLogisticsTile.y]->addPathToTPinLoadingBay(toSend);
@@ -366,33 +366,33 @@ void Engine::optionsInput(sf::Vector2f mouseGlobalPos)
 	}
 }
 
-void Engine::zoom(sf::View& mapView, float scrollDelta, float& zoomFactor)
+void Engine::zoom(std::shared_ptr<sf::View> mapView, float scrollDelta, float& zoomFactor)
 {
 	if (zoomFactor < MAX_ZOOM && scrollDelta > 0) {
 		zoomFactor += ZOOM_SENSITIVITY;
 		if (zoomFactor > MAX_ZOOM)zoomFactor = MAX_ZOOM;
-		mapView.setSize(resolution.x * zoomFactor, resolution.y * 0.9 * zoomFactor);
+		mapView->setSize(resolution.x * zoomFactor, resolution.y * 0.9 * zoomFactor);
 	}
 	else if (zoomFactor > MIN_ZOOM && scrollDelta < 0) {
 		zoomFactor -= ZOOM_SENSITIVITY;
 		if (zoomFactor < MIN_ZOOM)zoomFactor = MIN_ZOOM;
-		mapView.setSize(resolution.x * zoomFactor, resolution.y * 0.9 * zoomFactor);
+		mapView->setSize(resolution.x * zoomFactor, resolution.y * 0.9 * zoomFactor);
 	}
 }
 
-void Engine::cameraMover(sf::View& view, sf::Vector2f boundsMax, sf::Vector2f boundsMin)
+void Engine::cameraMover(std::shared_ptr<sf::View> view, sf::Vector2f boundsMax, sf::Vector2f boundsMin)
 {
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::W) && view.getCenter().y > (CAMERA_SENSITIVITY + boundsMin.y)) {
-		view.setCenter(sf::Vector2f(view.getCenter().x, view.getCenter().y - CAMERA_SENSITIVITY));
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::W) && view->getCenter().y > (CAMERA_SENSITIVITY + boundsMin.y)) {
+		view->setCenter(sf::Vector2f(view->getCenter().x, view->getCenter().y - CAMERA_SENSITIVITY));
 	}
-	else if (sf::Keyboard::isKeyPressed(sf::Keyboard::S) && view.getCenter().y < (boundsMax.y - CAMERA_SENSITIVITY)) {
-		view.setCenter(sf::Vector2f(view.getCenter().x, view.getCenter().y + CAMERA_SENSITIVITY));
+	else if (sf::Keyboard::isKeyPressed(sf::Keyboard::S) && view->getCenter().y < (boundsMax.y - CAMERA_SENSITIVITY)) {
+		view->setCenter(sf::Vector2f(view->getCenter().x, view->getCenter().y + CAMERA_SENSITIVITY));
 	}
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::A) && view.getCenter().x > (CAMERA_SENSITIVITY + boundsMin.x)) {
-		view.setCenter(sf::Vector2f(view.getCenter().x - CAMERA_SENSITIVITY, view.getCenter().y));
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::A) && view->getCenter().x > (CAMERA_SENSITIVITY + boundsMin.x)) {
+		view->setCenter(sf::Vector2f(view->getCenter().x - CAMERA_SENSITIVITY, view->getCenter().y));
 	}
-	else if (sf::Keyboard::isKeyPressed(sf::Keyboard::D) && view.getCenter().x < (boundsMax.x - CAMERA_SENSITIVITY)) {
-		view.setCenter(sf::Vector2f(view.getCenter().x + CAMERA_SENSITIVITY, view.getCenter().y));
+	else if (sf::Keyboard::isKeyPressed(sf::Keyboard::D) && view->getCenter().x < (boundsMax.x - CAMERA_SENSITIVITY)) {
+		view->setCenter(sf::Vector2f(view->getCenter().x + CAMERA_SENSITIVITY, view->getCenter().y));
 	}
 }
 
@@ -421,35 +421,35 @@ void Engine::run()
 	window.setFramerateLimit(60);
 
 	//Views (don't mess with the push_back order)
-	std::vector<sf::View> views;
+	std::vector<std::shared_ptr<sf::View>> views;
 	views.reserve(9);
 	//HUD view
-	views.push_back(sf::View(sf::FloatRect(0, 0, resolution.x, resolution.y * 0.1f)));
-	views[0].setViewport(sf::FloatRect(0, 0, 1, 0.1f));
+	views[0] = std::make_shared<sf::View>(sf::FloatRect(0, 0, resolution.x, resolution.y * 0.1f));
+	views[0]->setViewport(sf::FloatRect(0, 0, 1, 0.1f));
 	//Map view
-	views.push_back(sf::View(sf::Vector2f(mapSize.x / 2, mapSize.y / 2), sf::Vector2f(resolution.x, resolution.y * 0.9f)));
-	views[1].setViewport(sf::FloatRect(0, 0.1f, 1, 0.9f));
+	views[1] = std::make_shared<sf::View>(sf::Vector2f(mapSize.x / 2, mapSize.y / 2), sf::Vector2f(resolution.x, resolution.y * 0.9f));
+	views[1]->setViewport(sf::FloatRect(0, 0.1f, 1, 0.9f));
 	//Research left view
-	views.push_back(sf::View(sf::FloatRect(0, 0, resolution.x * 0.4f, resolution.y * 0.9f)));
-	views[2].setViewport(sf::FloatRect(0.f, 0.1f, 0.4f, 0.9f));
+	views[2] = std::make_shared<sf::View>(sf::FloatRect(0, 0, resolution.x * 0.4f, resolution.y * 0.9f));
+	views[2]->setViewport(sf::FloatRect(0.f, 0.1f, 0.4f, 0.9f));
 	//Research right view
-	views.push_back(sf::View(sf::FloatRect(0, 0, resolution.x * 0.1f, resolution.y * 0.9f)));
-	views[3].setViewport(sf::FloatRect(0.9f, 0.1f, 0.1f, 0.9f));
+	views[3] = std::make_shared<sf::View>(sf::FloatRect(0, 0, resolution.x * 0.1f, resolution.y * 0.9f));
+	views[3]->setViewport(sf::FloatRect(0.9f, 0.1f, 0.1f, 0.9f));
 	//Production view
-	views.push_back(sf::View(sf::Vector2f(mapSize.x / 2, mapSize.y / 2), sf::Vector2f(resolution.x, resolution.y * 0.9f)));
-	views[4].setViewport(sf::FloatRect(0, 0.1f, 1, 0.9f));
+	views[4] = std::make_shared<sf::View>(sf::Vector2f(mapSize.x / 2, mapSize.y / 2), sf::Vector2f(resolution.x, resolution.y * 0.9f));
+	views[4]->setViewport(sf::FloatRect(0, 0.1f, 1, 0.9f));
 	//Logistics view
-	views.push_back(sf::View(sf::Vector2f(resolution.x / 4, resolution.y * 0.225f), sf::Vector2f(resolution.x / 2, resolution.y * 0.45f)));
-	views[5].setViewport(sf::FloatRect(0.25f, 0.325f, 0.5f, 0.45f));
+	views[5] = std::make_shared<sf::View>(sf::Vector2f(resolution.x / 4, resolution.y * 0.225f), sf::Vector2f(resolution.x / 2, resolution.y * 0.45f));
+	views[5]->setViewport(sf::FloatRect(0.25f, 0.325f, 0.5f, 0.45f));
 	//Building view
-	views.push_back(sf::View(sf::Vector2f(mapSize.x / 2, mapSize.y / 2), sf::Vector2f(resolution.x, resolution.y * 0.9f)));
-	views[6].setViewport(sf::FloatRect(0, 0.1f, 1, 0.9f));
+	views[6] = std::make_shared<sf::View>(sf::Vector2f(mapSize.x / 2, mapSize.y / 2), sf::Vector2f(resolution.x, resolution.y * 0.9f));
+	views[6]->setViewport(sf::FloatRect(0, 0.1f, 1, 0.9f));
 	//Options view
-	views.push_back(sf::View(sf::Vector2f(resolution.x / 4, resolution.y * 0.225f), sf::Vector2f(resolution.x / 2, resolution.y * 0.45f)));
-	views[7].setViewport(sf::FloatRect(0.25f, 0.325f, 0.5f, 0.45f));
+	views[7] = std::make_shared<sf::View>(sf::Vector2f(resolution.x / 4, resolution.y * 0.225f), sf::Vector2f(resolution.x / 2, resolution.y * 0.45f));
+	views[7]->setViewport(sf::FloatRect(0.25f, 0.325f, 0.5f, 0.45f));
 	//Equipment view
-	views.push_back(sf::View(sf::FloatRect(0, 0, resolution.x * 0.1f, resolution.y * 0.9f)));
-	views[8].setViewport(sf::FloatRect(0.9f, 0.1f, 0.1f, 0.9f));
+	views[8] = std::make_shared<sf::View>(sf::FloatRect(0, 0, resolution.x * 0.1f, resolution.y * 0.9f));
+	views[8]->setViewport(sf::FloatRect(0.9f, 0.1f, 0.1f, 0.9f));
 
 	//Tab status
 	e_tab tabStatus = e_tab::UNITS;

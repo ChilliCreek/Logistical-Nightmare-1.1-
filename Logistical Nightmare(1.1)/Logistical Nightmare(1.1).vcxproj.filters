@@ -42,6 +42,9 @@
     <ClInclude Include="Transportable.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Battalion.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">

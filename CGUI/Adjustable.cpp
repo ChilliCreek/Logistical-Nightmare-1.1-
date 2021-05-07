@@ -1,17 +1,18 @@
 #include "pch.h"
 #include "Adjustable.h"
 #include"Functions.h"
-#include<iostream>
 
-std::stringstream Adjustable::ss;
-Adjustable::Adjustable(sf::Vector2f pos, float minVal, float maxVal, float size, const std::string& labelString, float defaultVal, const sf::Font& font)
+Adjustable::Adjustable(uint ID, const std::string& label, float size, sf::Vector2f pos, float minVal, float maxVal, float defaultVal, const sf::Font& font)
 {
+	this->ID = ID;
+	type = CGUI_TYPE::ADJUSTABLE;
+
 	m_minValFloat = minVal;
 	m_maxValFloat = maxVal;
 
 	m_label.setFont(font);
 	m_label.setPosition(pos);
-	m_label.setString(labelString);
+	m_label.setString(label);
 	m_label.setCharacterSize(30);
 	m_label.setFillColor(sf::Color::White);
 	m_size = size;
@@ -21,19 +22,19 @@ Adjustable::Adjustable(sf::Vector2f pos, float minVal, float maxVal, float size,
 	m_spectrum.setPosition(sf::Vector2f(m_label.getGlobalBounds().left + m_label.getLocalBounds().width + 10.f, pos.y + 15.f));
 
 	m_minVal.setFont(font);
-	m_minVal.setString(Adjustable::floatToString(minVal, 2));
+	m_minVal.setString(CGUI::floatToString(minVal, 2));
 	m_minVal.setCharacterSize(10.f);
 	m_minVal.setPosition(sf::Vector2f(m_spectrum.getPosition().x, m_spectrum.getPosition().y + 6.f));
 	m_minVal.setFillColor(sf::Color::White);
 
 	m_currentVal.setFont(font);
-	m_currentVal.setString(Adjustable::floatToString(defaultVal, 3));
+	m_currentVal.setString(CGUI::floatToString(defaultVal, 3));
 	m_currentVal.setCharacterSize(10.f);
 	m_currentVal.setPosition(m_spectrum.getPosition().x + defaultVal / (maxVal - minVal) * m_spectrum.getLocalBounds().width, m_spectrum.getPosition().y + 15.f);
 	m_currentVal.setFillColor(sf::Color::White);
 
 	m_maxVal.setFont(font);
-	m_maxVal.setString(Adjustable::floatToString(maxVal, 2));
+	m_maxVal.setString(CGUI::floatToString(maxVal, 2));
 	m_maxVal.setCharacterSize(10.f);
 	m_maxVal.setPosition(sf::Vector2f(m_spectrum.getGlobalBounds().left + m_spectrum.getLocalBounds().width - m_maxVal.getLocalBounds().width, m_spectrum.getPosition().y + 6.f));
 	m_maxVal.setFillColor(sf::Color::White);
@@ -57,30 +58,22 @@ void Adjustable::drawItself(sf::RenderWindow& window, sf::View& view)
 	window.draw(m_movable);
 }
 
-std::string Adjustable::floatToString(float val, float precision)
-{
-	ss << std::fixed << std::setprecision(precision) << val;
-	std::string res = ss.str();
-	ss.str(std::string());
-	return res;
-}
-
 void Adjustable::setMovablePosition(sf::Vector2f mousePos)
 {
 	if (mousePos.x < m_spectrum.getGlobalBounds().left) {
 		m_movable.setPosition(m_spectrum.getGlobalBounds().left, m_movable.getPosition().y);
 		m_currentVal.setPosition(m_spectrum.getGlobalBounds().left, m_currentVal.getPosition().y);
-		m_currentVal.setString(floatToString(getVal(), 3));
+		m_currentVal.setString(CGUI::floatToString(getVal(), 3));
 	}
 	else if (mousePos.x > m_spectrum.getGlobalBounds().left + m_spectrum.getGlobalBounds().width) {
 		m_movable.setPosition(m_spectrum.getGlobalBounds().left + m_spectrum.getGlobalBounds().width, m_movable.getPosition().y);
 		m_currentVal.setPosition(m_spectrum.getGlobalBounds().left + m_spectrum.getGlobalBounds().width, m_currentVal.getPosition().y);
-		m_currentVal.setString(floatToString(getVal(), 3));
+		m_currentVal.setString(CGUI::floatToString(getVal(), 3));
 	}
 	else {
 		m_movable.setPosition(mousePos.x + mouseMovableOffset.x, m_movable.getPosition().y);
 		m_currentVal.setPosition(mousePos.x + mouseMovableOffset.x, m_currentVal.getPosition().y);
-		m_currentVal.setString(floatToString(getVal(), 3));
+		m_currentVal.setString(CGUI::floatToString(getVal(), 3));
 	}
 }
 
@@ -102,9 +95,9 @@ void Adjustable::setValues(float minVal, float maxVal, float defaultVal)
 {
 	m_minValFloat = minVal;
 	m_maxValFloat = maxVal;
-	m_minVal.setString(Adjustable::floatToString(minVal, 2));
-	m_maxVal.setString(Adjustable::floatToString(maxVal, 2));
-	m_currentVal.setString(Adjustable::floatToString(defaultVal, 3));
+	m_minVal.setString(CGUI::floatToString(minVal, 2));
+	m_maxVal.setString(CGUI::floatToString(maxVal, 2));
+	m_currentVal.setString(CGUI::floatToString(defaultVal, 3));
 	m_movable.setPosition(m_spectrum.getPosition().x + defaultVal / (maxVal - minVal) * m_spectrum.getLocalBounds().width, m_spectrum.getPosition().y + 3.f);
 	m_currentVal.setPosition(m_spectrum.getPosition().x + defaultVal / (maxVal - minVal) * m_spectrum.getLocalBounds().width, m_spectrum.getPosition().y + 15.f);
 }

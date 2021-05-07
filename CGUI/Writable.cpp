@@ -1,30 +1,41 @@
 #include "pch.h"
 #include "Writable.h"
 
-Writable::Writable(sf::Vector2f size, sf::Vector2f pos, const sf::Font& font) : m_textField(size)
+Writable::Writable(uint ID, const std::string label, sf::Vector2f size, sf::Vector2f pos, const sf::Font& font) : m_textField(size), position(pos)
 {
-	m_string.setFont(font);
-	m_string.setCharacterSize(size.y - 5);
-	m_string.setFillColor(sf::Color::White);
-	m_string.setPosition(pos);
-	m_textField.setFillColor(sf::Color::Black);
-	m_textField.setPosition(pos);
-}
+	this->ID = ID;
+	type = CGUI_TYPE::WRITABLE;
 
-Writable::Writable(sf::Vector2f pos, const sf::Font& font) : Writable(sf::Vector2f(180, 30), pos, font)
-{
+	m_label.setFont(font);
+	m_label.setString(label);
+	m_label.setPosition(pos);
+	m_label.setCharacterSize(size.y - 5);
+	m_label.setFillColor(sf::Color::Black);
+
+	m_text.setFont(font);
+	m_text.setCharacterSize(size.y - 5);
+	m_text.setFillColor(sf::Color::White);
+	m_text.setPosition(sf::Vector2f(pos.x + m_label.getLocalBounds().width, pos.y + m_label.getLocalBounds().height));
+
+	m_textField.setFillColor(sf::Color::Black);
+	m_textField.setPosition(m_text.getPosition());
+
+	width = m_label.getLocalBounds().width + m_textField.getLocalBounds().width;
+	width = size.y;
 }
 
 void Writable::addCharacter(char input)
 {
 	if (input == 8) {
-		m_string.setString(m_string.getString().substring(0, m_string.getString().getSize() - 1));
+		m_input = m_input.substr(0, m_input.length() - 1);
+		m_text.setString(m_input);
 	}
 	else if (input < 128) {
-		m_string.setString(m_string.getString() + input);
+		m_input += input;
+		m_text.setString(m_input);
 	}
-	if (m_string.getLocalBounds().width > m_textField.getLocalBounds().width) {
-		m_string.setString(m_string.getString().substring(0, m_string.getString().getSize() - 1));
+	if (m_text.getLocalBounds().width > m_textField.getLocalBounds().width) {
+		m_text.setString(m_input.substr(0, m_input.length() - 1));
 	}
 }
 
@@ -35,9 +46,9 @@ void Writable::addNumber(char input)
 	}
 }
 
-std::string Writable::getString()const
+const std::string& Writable::getString()const
 {
-	return m_string.getString();
+	return m_input;;
 }
 
 void Writable::drawItself(sf::RenderWindow & window, sf::View & view)
@@ -45,5 +56,5 @@ void Writable::drawItself(sf::RenderWindow & window, sf::View & view)
 	window.setView(view);
 	window.draw(m_label);
 	window.draw(m_textField);
-	window.draw(m_string);
+	window.draw(m_text);
 }

@@ -15,8 +15,8 @@ constexpr float TIME_RATIO = 1.f / 2.43333333f;
 
 
 enum class e_tab { UNITS, RESEARCH, PRODUCTION, PRODUCTION_CLICKED, LOGISTICS, LOGISTICS_SEND, BUILDING, OPTIONS};
-enum class e_gameStat { RUNNING, PAUSED };
-enum class e_views {HUD, MAP, RESEARCH_LEFT, RESEARCH_RIGHT, PRODUCTION, LOGISTICS, BUILDING, OPTIONS, EQUIPMENT};
+enum e_gameStat { RUNNING, PAUSED };
+enum e_views {HUD, MAP, RESEARCH_LEFT, RESEARCH_RIGHT, PRODUCTION, LOGISTICS, BUILDING, OPTIONS, EQUIPMENT};
 
 class Renderer
 {
@@ -30,15 +30,15 @@ public:
 	static const int TILE_SIZE = 200;
 	Renderer();
 	//The draw methods for the engine
-	void drawToWindow(sf::RenderWindow& window, std::vector<sf::View>& views, e_tab& tabs, Tile*** tiles);
-	void drawHudToWindow(sf::RenderWindow& window, sf::View& hudView);
-	void drawMapToWindow(sf::RenderWindow& window, sf::View& mapView, Tile*** tiles);
-	void drawResearchLeftToWindow(sf::RenderWindow& window, std::vector<sf::View>& views);
-	void drawResearchRightToWindow(sf::RenderWindow& window, std::vector<sf::View>& views);
-	void drawLogisticsToWindow(sf::RenderWindow& window, std::vector<sf::View>& views, e_tab& tabs, Tile*** tiles);
+	void drawToWindow(sf::RenderWindow& window, std::vector<std::shared_ptr<sf::View>>& views, e_tab& tabs, Tile*** tiles);
+	void drawHudToWindow(sf::RenderWindow& window, std::shared_ptr<sf::View> hudView);
+	void drawMapToWindow(sf::RenderWindow& window, std::shared_ptr<sf::View> mapView, Tile*** tiles);
+	void drawResearchLeftToWindow(sf::RenderWindow& window, std::vector<std::shared_ptr<sf::View>>& views);
+	void drawResearchRightToWindow(sf::RenderWindow& window, std::vector<std::shared_ptr<sf::View>>& views);
+	void drawLogisticsToWindow(sf::RenderWindow& window, std::vector<std::shared_ptr<sf::View>>& views, e_tab& tabs, Tile*** tiles);
 	// TODO
-	void drawOptionsToWindow(sf::RenderWindow& window, sf::View& optionsView);
-	void drawProductionToWindow(sf::RenderWindow& window, std::vector<sf::View>& views, Tile*** tiles, e_tab& tabs);
+	void drawOptionsToWindow(sf::RenderWindow& window, std::shared_ptr<sf::View> optionsView);
+	void drawProductionToWindow(sf::RenderWindow& window, std::vector<std::shared_ptr<sf::View>>& views, Tile*** tiles, e_tab& tabs);
 	static std::string hoursToDateAndTime(int hours);
 	inline sf::Vector2i withinMapBounds(sf::Vector2i inp) {
 		if (inp.x >= 0 && inp.x < tilesNums.x && inp.y >= 0 && inp.y < tilesNums.y) {

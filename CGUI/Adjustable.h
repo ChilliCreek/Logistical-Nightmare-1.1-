@@ -1,12 +1,9 @@
 #pragma once
-#include<iomanip>
-#include<sstream>
-#include"GUI_Drawable.h"
+#include"CGUI.h"
 
-class Adjustable : public GUI_Drawable{
+class Adjustable : public CGUI_BASE{
 public:
-	Adjustable(sf::Vector2f pos, float minVal, float maxVal, float size, const std::string& labelString, float defaultVal, const sf::Font& font);
-	static std::string floatToString(float val, float precision);
+	Adjustable(uint ID, const std::string& label, float size, sf::Vector2f pos, float minVal, float maxVal, float defaultVal, const sf::Font& font);
 	void drawItself(sf::RenderWindow& window, sf::View& view);
 	void setMovablePosition(sf::Vector2f mousePos);
 	inline bool isClicked()const {
@@ -25,10 +22,11 @@ public:
 	float getVal();
 	void setValues(float minVal, float maxVal, float defaultVal);
 private:
+	bool m_clickedOrNot = false;
+	sf::Text m_label;
 	float m_size;
 	bool m_clickedOrNot = false;
 	sf::Vector2f mouseMovableOffset;
-	static std::stringstream ss;
 	sf::CircleShape m_movable;
 	sf::Text m_minVal;
 	float m_minValFloat;

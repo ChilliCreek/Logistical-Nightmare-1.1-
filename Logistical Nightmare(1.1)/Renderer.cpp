@@ -98,15 +98,15 @@ Renderer::Renderer() : zoomSensitivity(sf::Vector2f(0, 0), 0.01f, 0.10f, resolut
 	optionsBackground.setOutlineColor(sf::Color::Black);
 }
 
-void Renderer::drawToWindow(sf::RenderWindow& window, std::vector<sf::View>& views, e_tab& tabs, Tile*** tiles)
+void Renderer::drawToWindow(sf::RenderWindow& window, std::vector<std::shared_ptr<sf::View>>& views, e_tab& tabs, Tile*** tiles)
 {
-	drawHudToWindow(window, views[static_cast<int>(e_views::HUD)]);
+	drawHudToWindow(window, views[e_views::HUD]);
 	switch (tabs) {
 	case e_tab::UNITS:
-		drawMapToWindow(window, views[static_cast<int>(e_views::MAP)], tiles);
+		drawMapToWindow(window, views[e_views::MAP], tiles);
 		break;
 	case e_tab::RESEARCH:
-		drawMapToWindow(window, views[static_cast<int>(e_views::MAP)], tiles);
+		drawMapToWindow(window, views[e_views::MAP], tiles);
 		drawResearchLeftToWindow(window, views);
 		drawResearchRightToWindow(window, views);
 		break;
@@ -116,20 +116,20 @@ void Renderer::drawToWindow(sf::RenderWindow& window, std::vector<sf::View>& vie
 		break;
 	case e_tab::LOGISTICS_SEND:
 	case e_tab::LOGISTICS:
-		drawMapToWindow(window, views[static_cast<int>(e_views::MAP)], tiles);
+		drawMapToWindow(window, views[e_views::MAP], tiles);
 		drawLogisticsToWindow(window, views, tabs, tiles);
 		break;
 	case e_tab::BUILDING:
 		break;
 	case e_tab::OPTIONS:
-		drawOptionsToWindow(window, views[static_cast<int>(e_views::OPTIONS)]);
+		drawOptionsToWindow(window, views[e_views::OPTIONS]);
 		break;
 	}
 }
 
-void Renderer::drawHudToWindow(sf::RenderWindow& window, sf::View& hudView)
+void Renderer::drawHudToWindow(sf::RenderWindow& window, std::shared_ptr<sf::View> hudView)
 {
-	window.setView(hudView);
+	window.setView(*hudView);
 	window.draw(hudBackground);
 	window.draw(allegianceText1);
 	window.draw(allegianceText2);
@@ -145,20 +145,20 @@ void Renderer::drawHudToWindow(sf::RenderWindow& window, sf::View& hudView)
 	window.draw(timeAndDate);
 }
 
-void Renderer::drawMapToWindow(sf::RenderWindow& window, sf::View& mapView, Tile*** tiles)
+void Renderer::drawMapToWindow(sf::RenderWindow& window, std::shared_ptr<sf::View> mapView, Tile*** tiles)
 {
-	window.setView(mapView);
+	window.setView(*mapView);
 	window.draw(mapBackground);
 	for (int i = 0; i < tilesNums.x; i++) {
 		for (int j = 0; j < tilesNums.y; j++) {
-			tiles[i][j]->drawItselfOnMap(window, mapView);
+			tiles[i][j]->drawItselfOnMap(window, *mapView);
 		}
 	}
 }
 
-void Renderer::drawResearchRightToWindow(sf::RenderWindow& window, std::vector<sf::View>& views)
+void Renderer::drawResearchRightToWindow(sf::RenderWindow& window, std::vector<std::shared_ptr<sf::View>>& views)
 {
-	window.setView(views[static_cast<int>(e_views::RESEARCH_RIGHT)]);
+	window.setView(*views[e_views::RESEARCH_RIGHT]);
 	window.draw(researchBackgroundRight);
 	int i = 0;
 	for (auto& res : allResearch) {
@@ -180,15 +180,15 @@ void Renderer::drawResearchRightToWindow(sf::RenderWindow& window, std::vector<s
 	}
 }
 
-void Renderer::drawLogisticsToWindow(sf::RenderWindow & window, std::vector<sf::View>& views, e_tab& tabs, Tile*** tiles)
+void Renderer::drawLogisticsToWindow(sf::RenderWindow & window, std::vector<std::shared_ptr<sf::View>>& views, e_tab& tabs, Tile*** tiles)
 {
 	if (tabs == e_tab::LOGISTICS) {
 		if (selectedLogisticsTile.x != -1) {
-			window.setView(views[static_cast<int>(e_views::LOGISTICS)]);
+			window.setView(*views[e_views::LOGISTICS]);
 			window.draw(optionsBackground);
 			exitButton.setPosition(0, 0);
 			window.draw(exitButton);
-			tiles[selectedLogisticsTile.x][selectedLogisticsTile.y]->drawItselfOnLogistics(window, views[static_cast<int>(e_views::LOGISTICS)]);
+			tiles[selectedLogisticsTile.x][selectedLogisticsTile.y]->drawItselfOnLogistics(window, *views[e_views::LOGISTICS]);
 			if (tiles[selectedLogisticsTile.x][selectedLogisticsTile.y]->getSelectedEquipment() != "None") {
 				window.draw(sendButtonBackground);
 				window.draw(sendButton);
@@ -196,7 +196,7 @@ void Renderer::drawLogisticsToWindow(sf::RenderWindow & window, std::vector<sf::
 		}
 	}
 	else if(tabs == e_tab::LOGISTICS_SEND){
-		window.setView(views[static_cast<int>(e_views::LOGISTICS)]);
+		window.setView(*views[e_views::LOGISTICS]);
 		auto tilePaths = tiles[selectedLogisticsTile.x][selectedLogisticsTile.y]->getTransPInLoadingBay().pt->getPaths();
 		sf::RectangleShape arrows; sf::RectangleShape outline;
 		outline.setPosition(selectedLogisticsTile.x * TILE_SIZE, selectedLogisticsTile.y * TILE_SIZE);
@@ -214,9 +214,9 @@ void Renderer::drawLogisticsToWindow(sf::RenderWindow & window, std::vector<sf::
 	}
 }
 
-void Renderer::drawResearchLeftToWindow(sf::RenderWindow& window, std::vector<sf::View>& views)
+void Renderer::drawResearchLeftToWindow(sf::RenderWindow& window, std::vector<std::shared_ptr<sf::View>>& views)
 {
-	window.setView(views[static_cast<int>(e_views::RESEARCH_LEFT)]);
+	window.setView(*views[e_views::RESEARCH_LEFT]);
 	window.draw(researchBackgroundLeft);
 	sf::RectangleShape arrow;
 	arrow.setFillColor(sf::Color::Black);
@@ -236,27 +236,27 @@ void Renderer::drawResearchLeftToWindow(sf::RenderWindow& window, std::vector<sf
 	window.draw(researchFrameLeft);
 }
 
-void Renderer::drawOptionsToWindow(sf::RenderWindow & window, sf::View& optionsView)
+void Renderer::drawOptionsToWindow(sf::RenderWindow & window, std::shared_ptr<sf::View> optionsView)
 {
-	window.setView(optionsView);
+	window.setView(*optionsView);
 	window.draw(optionsBackground);
-	zoomSensitivity.drawItself(window, optionsView);
-	cameraSensitivity.drawItself(window, optionsView);
+	zoomSensitivity.drawItself(window, *optionsView);
+	cameraSensitivity.drawItself(window, *optionsView);
 }
 
-void Renderer::drawProductionToWindow(sf::RenderWindow& window, std::vector<sf::View>& views, Tile*** tiles, e_tab& tabs)
+void Renderer::drawProductionToWindow(sf::RenderWindow& window, std::vector<std::shared_ptr<sf::View>>& views, Tile*** tiles, e_tab& tabs)
 {
-	window.setView(views[static_cast<int>(e_views::PRODUCTION)]);
+	window.setView(*views[e_views::PRODUCTION]);
 	window.draw(mapBackground);
 	for (int i = 0; i < tilesNums.x; i++) {
 		for (int j = 0; j < tilesNums.y; j++) {
-			tiles[i][j]->drawItselfOnProduction(window, views[static_cast<int>(e_views::PRODUCTION)]);
+			tiles[i][j]->drawItselfOnProduction(window, *views[e_views::PRODUCTION]);
 		}
 	}
 	if (tabs == e_tab::PRODUCTION_CLICKED) {
 		drawResearchLeftToWindow(window, views);
 	}
-	window.setView(views[static_cast<int>(e_views::EQUIPMENT)]);
+	window.setView(*views[e_views::EQUIPMENT]);
 	window.draw(researchBackgroundRight);
 	
 	Allegiance& player = allegiances[playerNum];

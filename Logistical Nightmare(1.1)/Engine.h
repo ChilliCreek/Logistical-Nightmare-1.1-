@@ -25,14 +25,14 @@ private:
 	 * @return (int) How many "game" hours have passed since the last time the function.
 	 */
 	int handleTime(int& hours, float sec);
-	void input(sf::RenderWindow& window, std::vector<sf::View>& views, sf::Vector2f resolution, e_tab& tabStatus, Tile*** tiles);
+	void input(sf::RenderWindow& window, std::vector<std::shared_ptr<sf::View>>& views, sf::Vector2f resolution, e_tab& tabStatus, Tile*** tiles);
 	void hudInput(sf::Vector2f, e_tab&);
-	void researchInput(sf::RenderWindow& window, std::vector<sf::View>& views, sf::Vector2i mouseLocalPosition);
-	void productionInput(sf::RenderWindow& window, std::vector<sf::View>& views, sf::Vector2i mouseLocalPosition, e_tab& tabStatus, Tile*** tiles);
-	void logisticsInput(sf::RenderWindow& window, std::vector<sf::View>& views, sf::Vector2i mouseLocalPosition, Tile*** tiles, e_tab& tabStatus, sf::Event& event);
+	void researchInput(sf::RenderWindow& window, std::vector<std::shared_ptr<sf::View>>& views, sf::Vector2i mouseLocalPosition);
+	void productionInput(sf::RenderWindow& window, std::vector<std::shared_ptr<sf::View>>& views, sf::Vector2i mouseLocalPosition, e_tab& tabStatus, Tile*** tiles);
+	void logisticsInput(sf::RenderWindow& window, std::vector<std::shared_ptr<sf::View>>& views, sf::Vector2i mouseLocalPosition, Tile*** tiles, e_tab& tabStatus, sf::Event& event);
 	void optionsInput(sf::Vector2f mouseGlobalPos);
-	void zoom(sf::View& mapView, float scrollDelta, float& zoomFactor);
-	void cameraMover(sf::View& view, sf::Vector2f boundsMax, sf::Vector2f boundsMin);
+	void zoom(std::shared_ptr<sf::View> mapView, float scrollDelta, float& zoomFactor);
+	void cameraMover(std::shared_ptr<sf::View> view, sf::Vector2f boundsMax, sf::Vector2f boundsMin);
 	static float MAX_ZOOM, MIN_ZOOM;
 	static float ZOOM_FACTOR_MAP;
 	static float ZOOM_FACTOR_PRODUCTION;
