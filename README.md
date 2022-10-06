@@ -1,4 +1,3 @@
 # Logistical-Nightmare-1.1-
-Newer version that is supposed to have logistics mechanics. The idea to make this game was inspired an old card game, 
-The Campaign for North Africa by Simulation Publications. I had a pretty basic 1.0 demo. I was thinking of doing this just in C++, but I might use C++ instead.
-The current goal is to have a aplyable demo with the core mecahnics by the end of the summer.
+This is the newer version of Logistical Nightmare 1.0 that is supposed to have logistics mechanics. The idea to make this game was inspired an old card game, 
+The Campaign for North Africa by Simulation Publications. I have a pretty basic 1.0 demo in anotehr repository named Logistical Nightmare 1.0. I had to do many revisions over the course of the creations, and redo many rookie mistakes I did when I was a freshman. 
